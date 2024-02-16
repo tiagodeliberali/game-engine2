@@ -21,6 +21,11 @@ module.exports = {
       hash: true,
       template: "./public/index.html",
     }),
+    new CopyPlugin({
+      patterns: [
+        { from: "./public/textures", to: "./textures" },
+      ],
+    }),
   ],
   resolve: {
     extensions: [".tsx", ".ts", ".js"],
