@@ -1,0 +1,114 @@
+{
+	"tileWidth": 16,
+	"tileHeight": 16,
+	"uvs": {
+		"BG0": {
+			"row": 6,
+			"column": 1,
+			"width": 16,
+			"height": 16
+		},
+		"BG1": {
+			"row": 0,
+			"column": 0,
+			"width": 16,
+			"height": 16
+		},
+		"BG2": {
+			"row": 0,
+			"column": 2,
+			"width": 16,
+			"height": 16
+		},
+		"BG3": {
+			"row": 0,
+			"column": 3,
+			"width": 16,
+			"height": 16
+		},
+		"BG4": {
+			"row": 7,
+			"column": 7,
+			"width": 16,
+			"height": 16
+		},
+		"BG5": {
+			"row": 1,
+			"column": 1,
+			"width": 16,
+			"height": 16
+		},
+		"F": {
+			"row": 7,
+			"column": 0,
+			"width": 16,
+			"height": 16
+		},
+		"-": {
+			"row": 7,
+			"column": 1,
+			"width": 16,
+			"height": 16
+		},
+		"7": {
+			"row": 7,
+			"column": 2,
+			"width": 16,
+			"height": 16
+		},
+		"|.": {
+			"row": 6,
+			"column": 0,
+			"width": 16,
+			"height": 16
+		},
+		".": {
+			"row": 6,
+			"column": 3,
+			"width": 16,
+			"height": 16
+		},
+		".|": {
+			"row": 6,
+			"column": 2,
+			"width": 16,
+			"height": 16
+		},
+		"L": {
+			"row": 5,
+			"column": 0,
+			"width": 16,
+			"height": 16
+		},
+		"_": {
+			"row": 5,
+			"column": 1,
+			"width": 16,
+			"height": 16
+		},
+		"J": {
+			"row": 5,
+			"column": 2,
+			"width": 16,
+			"height": 16
+		},
+		"/": {
+			"row": 7,
+			"column": 3,
+			"width": 16,
+			"height": 16
+		},
+		"\\": {
+			"row": 7,
+			"column": 4,
+			"width": 16,
+			"height": 16
+		},
+		"role": {
+			"row": 0,
+			"column": 5,
+			"width": 32,
+			"height": 32
+		}
+	}
+}

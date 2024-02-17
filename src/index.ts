@@ -65,8 +65,52 @@ const buildProgram = (gl: WebGL2RenderingContext): WebGLProgram => {
 const loadImage = (name: string) => new Promise<HTMLImageElement>(resolve => {
     const image = new Image();
     image.addEventListener('load', () => resolve(image));
-    image.src = './textures/' + name;
+    image.src = `./textures/${name}.png`;
 });
+
+const loadAtlas = async (name: string): Promise<Atlas> => {
+    const file = await fetch(`./textures/${name}.json`);
+    const data = await file.json();
+    
+    const image = await loadImage(name);;
+
+    return new Atlas(image, data);
+}
+
+class Atlas {
+    image: HTMLImageElement;
+    tileWidth: number;
+    tileHeight: number;
+    uvs: any;
+
+    constructor(image: HTMLImageElement, data: any)
+    {
+        this.image = image;
+
+        this.tileHeight = data.tileHeight;
+        this.tileWidth = data.tileWidth;
+        this.uvs = data.uvs;
+    }
+
+    public buildSliceAt(name: string, position: Position): Float32Array {
+        const slice = this.uvs[name];
+
+        const y1 = (this.tileHeight * slice.row) / this.image.height;
+        const y2 = y1 + slice.height / this.image.height;
+
+        const x1 = (this.tileWidth * slice.column) / this.image.width;
+        const x2 = x1 + slice.width / this.image.width;
+
+        return new Float32Array([
+            position.x,                  position.y,                          x1, y1,
+            position.x + slice.width,    position.y + slice.height,           x2, y2,
+            position.x,                  position.y + slice.height,           x1, y2,
+            position.x,                  position.y,                          x1, y1,
+            position.x + slice.width,    position.y + slice.height,           x2, y2,
+            position.x + slice.width,    position.y,                          x2, y1,
+        ]);
+    } 
+}
 
 class Position {
     readonly x: number;
@@ -78,22 +122,11 @@ class Position {
     }
 }
 
-const buildCoordinates = (image: HTMLImageElement, bottonLeft: Position) => {
-    return new Float32Array([
-        bottonLeft.x,                   bottonLeft.y,                       0, 0,
-        bottonLeft.x + image.width,     bottonLeft.y + image.height,        1, 1,
-        bottonLeft.x,                   bottonLeft.y + image.height,        0, 1,
-        bottonLeft.x,                   bottonLeft.y,                       0, 0,
-        bottonLeft.x + image.width,     bottonLeft.y + image.height,        1, 1,
-        bottonLeft.x + image.width,     bottonLeft.y,                       1, 0,
-    ]);
-}
-
 const run = async () => {
     const gl = document.querySelector("canvas")!.getContext("webgl2")!;
     const program = buildProgram(gl);
 
-    gl.uniform2fv(gl.getUniformLocation(program, "canvas"), [320, 180]);
+    gl.uniform2fv(gl.getUniformLocation(program, "canvas"), [48, 32]);
     
     const aPositionLoc = 0;
     const aTextCoordLoc = 1;
@@ -102,36 +135,42 @@ const run = async () => {
     gl.enableVertexAttribArray(aTextCoordLoc);
     gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
 
-    const treeImage = await loadImage('tree.png');
-    const characterImage = await loadImage('character.png');
+    const dungeonAtlas = await loadAtlas('dungeon');
 
     const textureTree = gl.createTexture();
     gl.bindTexture(gl.TEXTURE_2D, textureTree);
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 96, 96, 0, gl.RGBA, gl.UNSIGNED_BYTE, treeImage);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, dungeonAtlas.image.width, dungeonAtlas.image.height, 0, gl.RGBA, gl.UNSIGNED_BYTE, dungeonAtlas.image);
 
     gl.generateMipmap(gl.TEXTURE_2D);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
 
 
-    // slice sheet
-    const x = 0;
-    const y = 0;
-    const y1 = (32 * y) / 256;
-    const y2 = y1 + 31/256;
-    const x1 = (32 * x) / 128;;
-    const x2 = x1 + 31 / 128;
-    
     const bufferData = new Float32Array([
-        ...buildCoordinates(treeImage, new Position(0, 10)),
-        ...buildCoordinates(treeImage, new Position(140, -20)),
-        ...buildCoordinates(treeImage, new Position(-140, 0)),
-        -.1, -.2,       x1, y1,
-        .1, .2,         x2, y2,
-        -.1, .2,        x1, y2,
-        -.1, -.2,       x1, y1,
-        .1, .2,         x2, y2,
-        .1, -.2,        x2, y1,
+        ...dungeonAtlas.buildSliceAt("L", new Position(-48,     16)),
+        ...dungeonAtlas.buildSliceAt("_", new Position(-32,     16)),
+        ...dungeonAtlas.buildSliceAt("J", new Position(-16,     16)),
+        ...dungeonAtlas.buildSliceAt("BG5", new Position(0,     16)),
+        ...dungeonAtlas.buildSliceAt("BG0", new Position(16,    16)),
+        ...dungeonAtlas.buildSliceAt("BG4", new Position(32,    16)),
+
+        ...dungeonAtlas.buildSliceAt("BG0", new Position(-16,   0)),
+        ...dungeonAtlas.buildSliceAt("BG1", new Position(0,     0)),
+        ...dungeonAtlas.buildSliceAt("BG2", new Position(16,    0)),
+        ...dungeonAtlas.buildSliceAt("BG3", new Position(32,    0)),
+
+        ...dungeonAtlas.buildSliceAt("role", new Position(-48,   -16)),
+        ...dungeonAtlas.buildSliceAt("BG1", new Position(-16,   -16)),
+        ...dungeonAtlas.buildSliceAt("/", new Position(0,     -16)),
+        ...dungeonAtlas.buildSliceAt("-", new Position(16,      -16)),
+        ...dungeonAtlas.buildSliceAt("-", new Position(32,      -16)),
+
+        ...dungeonAtlas.buildSliceAt("F", new Position(-48,     -32)),
+        ...dungeonAtlas.buildSliceAt("-", new Position(-32,     -32)),
+        ...dungeonAtlas.buildSliceAt("-", new Position(-16,     -32)),
+        ...dungeonAtlas.buildSliceAt(".", new Position(0,       -32)),
+        ...dungeonAtlas.buildSliceAt("BG1", new Position(16,      -32)),
+        ...dungeonAtlas.buildSliceAt("BG0", new Position(32,      -32)),
     ]);
     
     const buffer = gl.createBuffer();
@@ -141,18 +180,7 @@ const run = async () => {
     gl.vertexAttribPointer(aPositionLoc, 2, gl.FLOAT, false,  4 * 4, 0);
     gl.vertexAttribPointer(aTextCoordLoc, 2, gl.FLOAT, false, 4 * 4, 2 * 4);
     
-    gl.drawArrays(gl.TRIANGLES, 0, 18);
-
-
-    const textureCharacter = gl.createTexture();
-    gl.bindTexture(gl.TEXTURE_2D, textureCharacter);
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 128, 256, 0, gl.RGBA, gl.UNSIGNED_BYTE, characterImage);
-
-    gl.generateMipmap(gl.TEXTURE_2D);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
-
-    gl.drawArrays(gl.TRIANGLES, 18, 24);
+    gl.drawArrays(gl.TRIANGLES, 0, bufferData.length);
 }
 
 run();
