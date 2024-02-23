@@ -1,20 +1,28 @@
 <!doctype html>
 <html lang="en">
-  <style>
-    canvas {
-      border: 1px solid #ccc;
-    }
-  </style>
+<style>
+  canvas {
+    border: 1px solid #ccc;
+  }
+</style>
 
-  <head>
-    <meta charset="utf-8" />
-    <title><%= htmlWebpackPlugin.options.title %></title>
-  </head>
+<head>
+  <meta charset="utf-8" />
+  <title>
+    <%= htmlWebpackPlugin.options.title %>
+  </title>
+</head>
 
-  <body>
-    <noscript>You need to enable JavaScript to run this app.</noscript>
-    <canvas id="canvas" width="640" height="360">
-      Your browser does not support the HTML5 canvas.
-    </canvas>
-  </body>
+<body>
+  <noscript>You need to enable JavaScript to run this app.</noscript>
+  <canvas id="canvas" width="96" height="64" style="
+        width: 480px;
+        height: 320px;
+        image-rendering: crisp-edges; /* for firefox */
+        image-rendering: pixelated;   /* for everything else */
+    ">
+    Your browser does not support the HTML5 canvas.
+  </canvas>
+</body>
+
 </html>

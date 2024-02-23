@@ -123,10 +123,11 @@ class Position {
 }
 
 const run = async () => {
-  const gl = document.querySelector("canvas")!.getContext("webgl2")!;
+  const canvas = document.querySelector("canvas")!;
+  const gl = canvas.getContext("webgl2")!;
   const program = buildProgram(gl);
 
-  gl.uniform2fv(gl.getUniformLocation(program, "canvas"), [48, 32]);
+  gl.uniform2fv(gl.getUniformLocation(program, "canvas"), [canvas.width / 2, canvas.height / 2]);
 
   const aPositionLoc = 0;
   const aTextCoordLoc = 1;
@@ -139,7 +140,7 @@ const run = async () => {
 
   const textureTree = gl.createTexture();
   gl.bindTexture(gl.TEXTURE_2D, textureTree);
-gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, dungeonAtlas.image.width, dungeonAtlas.image.height, 0, gl.RGBA, gl.UNSIGNED_BYTE, dungeonAtlas.image);
+  gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, dungeonAtlas.image.width, dungeonAtlas.image.height, 0, gl.RGBA, gl.UNSIGNED_BYTE, dungeonAtlas.image);
 
   gl.generateMipmap(gl.TEXTURE_2D);
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
