@@ -5,7 +5,6 @@ module.exports = {
   rules: {},
   extends: [
     "eslint:recommended",
-    "plugin:@typescript-eslint/recommended",
-    "prettier",
+    "plugin:@typescript-eslint/recommended"
   ],
 };
