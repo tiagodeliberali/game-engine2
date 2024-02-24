@@ -106,16 +106,16 @@ const run = async () => {
   const modelBuffer = gl.createBuffer();
   gl.bindBuffer(gl.ARRAY_BUFFER, modelBuffer);
   gl.bufferData(gl.ARRAY_BUFFER, bufferData.modelBuffer, gl.STATIC_DRAW);
-  gl.vertexAttribPointer(aPositionLoc, 2, gl.FLOAT, false, 4 * 4, 0);
-  gl.vertexAttribPointer(aTextCoordLoc, 2, gl.FLOAT, false, 4 * 4, 2 * 4);
+  gl.vertexAttribPointer(aPositionLoc, 2, gl.FLOAT, false, 4 * Float32Array.BYTES_PER_ELEMENT, 0);
+  gl.vertexAttribPointer(aTextCoordLoc, 2, gl.FLOAT, false, 4 * Float32Array.BYTES_PER_ELEMENT, 2 * Float32Array.BYTES_PER_ELEMENT);
   gl.enableVertexAttribArray(aPositionLoc);
   gl.enableVertexAttribArray(aTextCoordLoc);
 
   const transformBuffer = gl.createBuffer();
   gl.bindBuffer(gl.ARRAY_BUFFER, transformBuffer);
   gl.bufferData(gl.ARRAY_BUFFER, bufferData.transformBuffer, gl.STATIC_DRAW);
-  gl.vertexAttribPointer(aOffset, 3, gl.FLOAT, false, 4 * 4, 0);
-  gl.vertexAttribPointer(aDepth, 1, gl.FLOAT, false, 4 * 4, 4 * 3);
+  gl.vertexAttribPointer(aOffset, 3, gl.FLOAT, false, 4 * Float32Array.BYTES_PER_ELEMENT, 0);
+  gl.vertexAttribPointer(aDepth, 1, gl.FLOAT, false, 4 * Float32Array.BYTES_PER_ELEMENT, 3 * Float32Array.BYTES_PER_ELEMENT);
   gl.enableVertexAttribArray(aOffset);
   gl.enableVertexAttribArray(aDepth);
 
