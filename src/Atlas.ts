@@ -7,47 +7,81 @@ const loadImage = (name: string) =>
         image.src = `./textures/${name}.png`;
     });
 
+const loadData = async (name: string): Promise<AtlasData> => {
+    const file = await fetch(`./textures/${name}.json`);
+    return await file.json();
+}
+
+class AtlasData {
+    public tileSize!: number;
+    public mapWidth!: number;
+    public mapHeight!: number;
+    public layers!: [Layer];
+}
+
+class Layer {
+    public name!: string;
+    public collider!: boolean;
+    public tiles!: [Tile];
+}
+
+class Tile {
+    public id!: string;
+    public x!: number;
+    public y!: number;
+}
+
 // importer for https://www.spritefusion.com/editor
 export class Atlas {
     image: HTMLImageElement;
-    tileWidth: number;
-    tileHeight: number;
-    uvs: any;
+    data: AtlasData;
   
-    constructor(image: HTMLImageElement, data: any) {
+    constructor(image: HTMLImageElement, data: AtlasData) {
       this.image = image;
-  
-      this.tileHeight = data.tileHeight;
-      this.tileWidth = data.tileWidth;
-      this.uvs = data.uvs;
+      this.data = data;
     }
   
     public static async load(name: string)
     {
-      const file = await fetch(`./textures/${name}.json`);
-      const data = await file.json();
-    
+      const data = await loadData(name);    
       const image = await loadImage(name);
     
       return new Atlas(image, data);
     }
-  
-    public buildSliceAt(name: string, position: Position): Float32Array {
-      const slice = this.uvs[name];
-  
-      const y1 = (this.tileHeight * slice.row) / this.image.height;
-      const y2 = y1 + slice.height / this.image.height;
-  
-      const x1 = (this.tileWidth * slice.column) / this.image.width;
-      const x2 = x1 + slice.width / this.image.width;
-  
-      return new Float32Array([
-        position.x,                  position.y,                          x1, y1,
-        position.x + slice.width,    position.y + slice.height,           x2, y2,
-        position.x,                  position.y + slice.height,           x1, y2,
-        position.x,                  position.y,                          x1, y1,
-        position.x + slice.width,    position.y + slice.height,           x2, y2,
-        position.x + slice.width,    position.y,                          x2, y1,
-    ]);
+
+    public build(): Float32Array {
+        const totalTiles = this.data.layers.reduce<number>((prev, elem) => prev + elem.tiles.length, 0);
+
+        // each tile is represented by 6 vertices. 
+        // Each vertice contains positions (x, y) uv mapping (u, v) and index representing the position
+        const infoPerTile = 6 * 5;
+        const result = new Float32Array(totalTiles * infoPerTile);
+
+        // avoid memory allocation on each iteration
+        var layer = new Layer();
+        var tile = new Tile();
+        var position = new Position(0, 0);
+        var offset = 0;
+        
+        for (var layerIndex = this.data.layers.length - 1; layerIndex >= 0; layerIndex--)
+        {
+            layer = this.data.layers[layerIndex];
+
+            for (var tileIndex = 0; tileIndex < layer.tiles.length; tileIndex++)
+            {
+                tile = layer.tiles[tileIndex];
+                position.set(tile.x * this.data.tileSize, tile.y * this.data.tileSize);
+
+                result.set([
+                    position.x,                         position.y,                          0, 0,       Number.parseFloat(tile.id),
+                    position.x + this.data.tileSize,    position.y + this.data.tileSize,     1, 1,       Number.parseFloat(tile.id),
+                    position.x,                         position.y + this.data.tileSize,     0, 1,       Number.parseFloat(tile.id),
+                    position.x,                         position.y,                          0, 0,       Number.parseFloat(tile.id),
+                    position.x + this.data.tileSize,    position.y + this.data.tileSize,     1, 1,       Number.parseFloat(tile.id),
+                    position.x + this.data.tileSize,    position.y,                          1, 0,       Number.parseFloat(tile.id)
+                ], (offset++) * infoPerTile);
+            }
+        }
+        return result;
     }
   }

@@ -79,49 +79,24 @@ const run = async () => {
   gl.enableVertexAttribArray(aTextCoordLoc);
   gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
 
-  const dungeonAtlas = await Atlas.load("dungeon");
+  const marioAtlas = await Atlas.load("mario");
 
   const textureTree = gl.createTexture();
   gl.bindTexture(gl.TEXTURE_2D, textureTree);
-  gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, dungeonAtlas.image.width, dungeonAtlas.image.height, 0, gl.RGBA, gl.UNSIGNED_BYTE, dungeonAtlas.image);
+  gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, marioAtlas.image.width, marioAtlas.image.height, 0, gl.RGBA, gl.UNSIGNED_BYTE, marioAtlas.image);
 
   gl.generateMipmap(gl.TEXTURE_2D);
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
 
-  const bufferData = new Float32Array([
-    ...dungeonAtlas.buildSliceAt("L", new Position(-48, 16)),
-    ...dungeonAtlas.buildSliceAt("_", new Position(-32, 16)),
-    ...dungeonAtlas.buildSliceAt("J", new Position(-16, 16)),
-    ...dungeonAtlas.buildSliceAt("BG5", new Position(0, 16)),
-    ...dungeonAtlas.buildSliceAt("BG0", new Position(16, 16)),
-    ...dungeonAtlas.buildSliceAt("BG4", new Position(32, 16)),
-
-    ...dungeonAtlas.buildSliceAt("BG0", new Position(-16, 0)),
-    ...dungeonAtlas.buildSliceAt("BG1", new Position(0, 0)),
-    ...dungeonAtlas.buildSliceAt("BG2", new Position(16, 0)),
-    ...dungeonAtlas.buildSliceAt("BG3", new Position(32, 0)),
-
-    ...dungeonAtlas.buildSliceAt("hole", new Position(-48, -16)),
-    ...dungeonAtlas.buildSliceAt("BG1", new Position(-16, -16)),
-    ...dungeonAtlas.buildSliceAt("/", new Position(0, -16)),
-    ...dungeonAtlas.buildSliceAt("-", new Position(16, -16)),
-    ...dungeonAtlas.buildSliceAt("-", new Position(32, -16)),
-
-    ...dungeonAtlas.buildSliceAt("F", new Position(-48, -32)),
-    ...dungeonAtlas.buildSliceAt("-", new Position(-32, -32)),
-    ...dungeonAtlas.buildSliceAt("-", new Position(-16, -32)),
-    ...dungeonAtlas.buildSliceAt(".", new Position(0, -32)),
-    ...dungeonAtlas.buildSliceAt("BG1", new Position(16, -32)),
-    ...dungeonAtlas.buildSliceAt("BG0", new Position(32, -32)),
-  ]);
+  const bufferData = marioAtlas.build();
 
   const buffer = gl.createBuffer();
   gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
   gl.bufferData(gl.ARRAY_BUFFER, bufferData, gl.STATIC_DRAW);
 
-  gl.vertexAttribPointer(aPositionLoc, 2, gl.FLOAT, false, 4 * 4, 0);
-  gl.vertexAttribPointer(aTextCoordLoc, 2, gl.FLOAT, false, 4 * 4, 2 * 4);
+  gl.vertexAttribPointer(aPositionLoc, 2, gl.FLOAT, false, 4 * 5, 0);
+  gl.vertexAttribPointer(aTextCoordLoc, 2, gl.FLOAT, false, 4 * 5, 2 * 4);
 
   gl.drawArrays(gl.TRIANGLES, 0, bufferData.length);
 };
