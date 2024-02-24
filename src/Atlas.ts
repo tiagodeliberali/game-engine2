@@ -6,6 +6,8 @@ build vertical atlas with:
     magick montage -mode concatenate -tile 1x  mario_tiles_*.png -background none mario.png
 */
 
+const zUnity = 0.00001;
+
 const loadImage = (name: string) =>
     new Promise<HTMLImageElement>((resolve) => {
         const image = new Image();
@@ -55,19 +57,26 @@ export class Atlas {
       return new Atlas(image, data);
     }
 
-    public build(): Float32Array {
+    public build(): AtlasVertexBuffer {
         const totalTiles = this.data.layers.reduce<number>((prev, elem) => prev + elem.tiles.length, 0);
 
-        // each tile is represented by 6 vertices. 
-        // Each vertice contains positions (x, y) uv mapping (u, v) and index representing the position
-        const infoPerTile = 6 * 5;
-        const result = new Float32Array(totalTiles * infoPerTile);
+        const infoPerTile = 4;
+        const transformBuffer = new Float32Array(totalTiles * infoPerTile);
 
         // avoid memory allocation on each iteration
         var layer = new Layer();
         var tile = new Tile();
         var position = new Position(0, 0);
         var offset = 0;
+
+        const modelBuffer = new Float32Array([
+            0,                     0,                       0, 1,
+            this.data.tileSize,    this.data.tileSize,      1, 0,
+            0,                     this.data.tileSize,      0, 0,
+            0,                     0,                       0, 1,
+            this.data.tileSize,    0,                       1, 1,
+            this.data.tileSize,    this.data.tileSize,      1, 0,
+        ]);
         
         for (var layerIndex = this.data.layers.length - 1; layerIndex >= 0; layerIndex--)
         {
@@ -78,16 +87,21 @@ export class Atlas {
                 tile = layer.tiles[tileIndex];
                 position.set(tile.x * this.data.tileSize, (this.data.mapHeight - 1 - tile.y) * this.data.tileSize);
 
-                result.set([
-                    position.x,                         position.y,                          0, 1,       Number.parseFloat(tile.id),
-                    position.x + this.data.tileSize,    position.y + this.data.tileSize,     1, 0,       Number.parseFloat(tile.id),
-                    position.x,                         position.y + this.data.tileSize,     0, 0,       Number.parseFloat(tile.id),
-                    position.x,                         position.y,                          0, 1,       Number.parseFloat(tile.id),
-                    position.x + this.data.tileSize,    position.y,                          1, 1,       Number.parseFloat(tile.id),
-                    position.x + this.data.tileSize,    position.y + this.data.tileSize,     1, 0,       Number.parseFloat(tile.id)
+                transformBuffer.set([
+                    position.x, position.y, zUnity * (this.data.layers.length - layerIndex), Number.parseFloat(tile.id),
                 ], (offset++) * infoPerTile);
             }
         }
-        return result;
+        return new AtlasVertexBuffer(modelBuffer, transformBuffer);
+    }
+  }
+
+  export class AtlasVertexBuffer {
+    modelBuffer: Float32Array;
+    transformBuffer: Float32Array;
+
+    constructor(modelBuffer: Float32Array, transformBuffer: Float32Array) {
+        this.modelBuffer = modelBuffer;
+        this.transformBuffer = transformBuffer;
     }
   }

@@ -1,12 +1,12 @@
 import { Atlas } from "./Atlas";
-import { Position } from "./Position";
 
 const vertexShaderSource = `#version 300 es
 #pragma vscode_glsllint_stage: vert
 
 layout(location = 0) in vec3 aPosition;
 layout(location = 1) in vec2 aTextCoord;
-layout(location = 2) in float aDepth;
+layout(location = 2) in vec3 aOffset;
+layout(location = 3) in float aDepth;
 
 uniform vec2 canvas;
 
@@ -17,9 +17,7 @@ void main()
 {
     vTextCoord = aTextCoord;
     vDepth = aDepth;
-    gl_Position = 
-      vec4(aPosition, 1.0) * vec4(1.0 / canvas.x, 1.0 / canvas.y, 1.0, 1.0)
-      - vec4(1, 1, 0, 0);
+    gl_Position = vec4((aPosition.xyz + aOffset) * vec3(1.0 / canvas.x, 1.0 / canvas.y, 1.0) - vec3(1, 1, 0), 1.0);
 }`;
 
 const fragmentShaderSource = `#version 300 es
@@ -80,12 +78,8 @@ const run = async () => {
 
   const aPositionLoc = 0;
   const aTextCoordLoc = 1;
-  const aDepth = 2;
-
-  gl.enableVertexAttribArray(aPositionLoc);
-  gl.enableVertexAttribArray(aTextCoordLoc);
-  gl.enableVertexAttribArray(aDepth);
-  // gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+  const aOffset = 2;
+  const aDepth = 3;
 
   const marioAtlas = await Atlas.load("mario");
 
@@ -109,15 +103,26 @@ const run = async () => {
 
   const bufferData = marioAtlas.build();
 
-  const buffer = gl.createBuffer();
-  gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
-  gl.bufferData(gl.ARRAY_BUFFER, bufferData, gl.STATIC_DRAW);
+  const modelBuffer = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, modelBuffer);
+  gl.bufferData(gl.ARRAY_BUFFER, bufferData.modelBuffer, gl.STATIC_DRAW);
+  gl.vertexAttribPointer(aPositionLoc, 2, gl.FLOAT, false, 4 * 4, 0);
+  gl.vertexAttribPointer(aTextCoordLoc, 2, gl.FLOAT, false, 4 * 4, 2 * 4);
+  gl.enableVertexAttribArray(aPositionLoc);
+  gl.enableVertexAttribArray(aTextCoordLoc);
 
-  gl.vertexAttribPointer(aPositionLoc, 2, gl.FLOAT, false, 4 * 5, 0);
-  gl.vertexAttribPointer(aTextCoordLoc, 2, gl.FLOAT, false, 4 * 5, 2 * 4);
-  gl.vertexAttribPointer(aDepth, 1, gl.FLOAT, false, 4 * 5, 4 * 4);
+  const transformBuffer = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, transformBuffer);
+  gl.bufferData(gl.ARRAY_BUFFER, bufferData.transformBuffer, gl.STATIC_DRAW);
+  gl.vertexAttribPointer(aOffset, 3, gl.FLOAT, false, 4 * 4, 0);
+  gl.vertexAttribPointer(aDepth, 1, gl.FLOAT, false, 4 * 4, 4 * 3);
+  gl.enableVertexAttribArray(aOffset);
+  gl.enableVertexAttribArray(aDepth);
 
-  gl.drawArrays(gl.TRIANGLES, 0, bufferData.length);
+  gl.vertexAttribDivisor(aOffset, 1);
+  gl.vertexAttribDivisor(aDepth, 1);
+
+  gl.drawArraysInstanced(gl.TRIANGLES, 0, bufferData.modelBuffer.length / 4, bufferData.transformBuffer.length / 4);
 };
 
 run();
