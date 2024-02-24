@@ -57,9 +57,6 @@ export class Atlas {
 
     public build(): Float32Array {
         const totalTiles = this.data.layers.reduce<number>((prev, elem) => prev + elem.tiles.length, 0);
-        const minX = this.data.layers.reduce<number>((prev, elem) => Math.min(prev, elem.tiles.reduce((a, b) => Math.min(a, b.x), 10000)), 10000);
-        const minY = this.data.layers.reduce<number>((prev, elem) => Math.min(prev, elem.tiles.reduce((a, b) => Math.min(a, b.y), 10000)), 10000);
-        const maxY = this.data.layers.reduce<number>((prev, elem) => Math.max(prev, elem.tiles.reduce((a, b) => Math.max(a, b.y), -10000)), -10000);
 
         // each tile is represented by 6 vertices. 
         // Each vertice contains positions (x, y) uv mapping (u, v) and index representing the position
@@ -79,7 +76,7 @@ export class Atlas {
             for (var tileIndex = 0; tileIndex < layer.tiles.length; tileIndex++)
             {
                 tile = layer.tiles[tileIndex];
-                position.set(tile.x * this.data.tileSize - minX, maxY - minY - tile.y * this.data.tileSize);
+                position.set(tile.x * this.data.tileSize, (this.data.mapHeight - 1 - tile.y) * this.data.tileSize);
 
                 result.set([
                     position.x,                         position.y,                          0, 1,       Number.parseFloat(tile.id),

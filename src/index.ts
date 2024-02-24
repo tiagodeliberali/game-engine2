@@ -19,7 +19,7 @@ void main()
     vDepth = aDepth;
     gl_Position = 
       vec4(aPosition, 1.0) * vec4(1.0 / canvas.x, 1.0 / canvas.y, 1.0, 1.0)
-      - vec4(1, -.3, 0, 0);
+      - vec4(1, 1, 0, 0);
 }`;
 
 const fragmentShaderSource = `#version 300 es
