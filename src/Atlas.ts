@@ -1,5 +1,3 @@
-import { Position } from "./Position";
-
 /*
 # importer for https://www.spritefusion.com/editor
 
@@ -68,7 +66,6 @@ export class Atlas {
         // avoid memory allocation on each iteration
         var layer = new Layer();
         var tile = new Tile();
-        var position = new Position(0, 0);
         var offset = 0;
 
         const modelBuffer = new Float32Array([
@@ -87,10 +84,12 @@ export class Atlas {
             for (var tileIndex = 0; tileIndex < layer.tiles.length; tileIndex++)
             {
                 tile = layer.tiles[tileIndex];
-                position.set(tile.x * this.data.tileSize, (this.data.mapHeight - 1 - tile.y) * this.data.tileSize);
-
+                
                 transformBuffer.set([
-                    position.x, position.y, zUnity * (this.data.layers.length - layerIndex), Number.parseFloat(tile.id),
+                    tile.x * this.data.tileSize,                                // x
+                    (this.data.mapHeight - 1 - tile.y) * this.data.tileSize,    // y
+                    zUnity * (this.data.layers.length - layerIndex),            // z
+                    Number.parseFloat(tile.id),                                 // depth
                 ], (offset++) * infoPerTile);
             }
         }
