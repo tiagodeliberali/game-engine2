@@ -1,6 +1,9 @@
 import { Position } from "./Position";
 
 /*
+# importer for https://www.spritefusion.com/editor
+
+
 build vertical atlas with:
     magick mario_original.png -crop 16x16  +repage  +adjoin  mario_tiles_%010d.png
     magick montage -mode concatenate -tile 1x  mario_tiles_*.png -background none mario.png
@@ -39,7 +42,6 @@ class Tile {
     public y!: number;
 }
 
-// importer for https://www.spritefusion.com/editor
 export class Atlas {
     image: HTMLImageElement;
     data: AtlasData;
