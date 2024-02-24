@@ -82,12 +82,12 @@ export class Atlas {
                 position.set(tile.x * this.data.tileSize - minX, maxY - minY - tile.y * this.data.tileSize);
 
                 result.set([
-                    position.x,                         position.y,                          0, 0,       119 - Number.parseFloat(tile.id),
-                    position.x + this.data.tileSize,    position.y + this.data.tileSize,     1, 1,       119 - Number.parseFloat(tile.id),
-                    position.x,                         position.y + this.data.tileSize,     0, 1,       119 - Number.parseFloat(tile.id),
-                    position.x,                         position.y,                          0, 0,       119 - Number.parseFloat(tile.id),
-                    position.x + this.data.tileSize,    position.y + this.data.tileSize,     1, 1,       119 - Number.parseFloat(tile.id),
-                    position.x + this.data.tileSize,    position.y,                          1, 0,       119 - Number.parseFloat(tile.id)
+                    position.x,                         position.y,                          0, 1,       Number.parseFloat(tile.id),
+                    position.x + this.data.tileSize,    position.y + this.data.tileSize,     1, 0,       Number.parseFloat(tile.id),
+                    position.x,                         position.y + this.data.tileSize,     0, 0,       Number.parseFloat(tile.id),
+                    position.x,                         position.y,                          0, 1,       Number.parseFloat(tile.id),
+                    position.x + this.data.tileSize,    position.y,                          1, 1,       Number.parseFloat(tile.id),
+                    position.x + this.data.tileSize,    position.y + this.data.tileSize,     1, 0,       Number.parseFloat(tile.id)
                 ], (offset++) * infoPerTile);
             }
         }

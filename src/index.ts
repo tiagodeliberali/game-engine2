@@ -85,7 +85,7 @@ const run = async () => {
   gl.enableVertexAttribArray(aPositionLoc);
   gl.enableVertexAttribArray(aTextCoordLoc);
   gl.enableVertexAttribArray(aDepth);
-  gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+  // gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
 
   const marioAtlas = await Atlas.load("mario");
 
