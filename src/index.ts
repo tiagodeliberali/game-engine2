@@ -122,6 +122,9 @@ const run = async () => {
   gl.vertexAttribDivisor(aOffset, 1);
   gl.vertexAttribDivisor(aDepth, 1);
 
+  gl.enable(gl.BLEND);
+  gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+  
   gl.drawArraysInstanced(gl.TRIANGLES, 0, bufferData.modelBuffer.length / 4, bufferData.transformBuffer.length / 4);
 };
 
