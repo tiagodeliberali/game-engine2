@@ -6,15 +6,20 @@ const vertexShaderSource = `#version 300 es
 
 layout(location = 0) in vec3 aPosition;
 layout(location = 1) in vec2 aTextCoord;
+layout(location = 2) in float aDepth;
 
 uniform vec2 canvas;
 
 out vec2 vTextCoord;
+out float vDepth;
 
 void main()
 {
     vTextCoord = aTextCoord;
-    gl_Position = vec4(aPosition, 1.0) * vec4(1.0 / canvas.x, 1.0 / canvas.y, 1.0, 1.0);
+    vDepth = aDepth;
+    gl_Position = 
+      vec4(aPosition, 1.0) * vec4(1.0 / canvas.x, 1.0 / canvas.y, 1.0, 1.0)
+      - vec4(1, -.3, 0, 0);
 }`;
 
 const fragmentShaderSource = `#version 300 es
@@ -23,13 +28,14 @@ const fragmentShaderSource = `#version 300 es
 precision mediump float;
 
 in vec2 vTextCoord;
-uniform sampler2D uSampler;
+in float vDepth;
+uniform mediump sampler2DArray uSampler;
 
 out vec4 fragColor;
 
 void main()
 {
-    fragColor = texture(uSampler, vTextCoord);
+    fragColor = texture(uSampler, vec3(vTextCoord, vDepth));
 }`;
 
 const loadShader = (
@@ -74,20 +80,32 @@ const run = async () => {
 
   const aPositionLoc = 0;
   const aTextCoordLoc = 1;
+  const aDepth = 2;
 
   gl.enableVertexAttribArray(aPositionLoc);
   gl.enableVertexAttribArray(aTextCoordLoc);
+  gl.enableVertexAttribArray(aDepth);
   gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
 
   const marioAtlas = await Atlas.load("mario");
 
-  const textureTree = gl.createTexture();
-  gl.bindTexture(gl.TEXTURE_2D, textureTree);
-  gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, marioAtlas.image.width, marioAtlas.image.height, 0, gl.RGBA, gl.UNSIGNED_BYTE, marioAtlas.image);
+  const marioTexture = gl.createTexture();
+  gl.bindTexture(gl.TEXTURE_2D_ARRAY, marioTexture);
+  gl.texImage3D(
+    gl.TEXTURE_2D_ARRAY, 
+    0, 
+    gl.RGBA, 
+    marioAtlas.image.width, // width of the image
+    marioAtlas.image.width, // height of the image: since we are using a vertical atlas with squared tiles, we will consider that each tile height == tile width
+    marioAtlas.image.height / marioAtlas.image.width, // the number of tiles is height / width
+    0, 
+    gl.RGBA, 
+    gl.UNSIGNED_BYTE, 
+    marioAtlas.image);
 
-  gl.generateMipmap(gl.TEXTURE_2D);
-  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
-  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+  gl.generateMipmap(gl.TEXTURE_2D_ARRAY);
+  gl.texParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+  gl.texParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
 
   const bufferData = marioAtlas.build();
 
@@ -97,6 +115,7 @@ const run = async () => {
 
   gl.vertexAttribPointer(aPositionLoc, 2, gl.FLOAT, false, 4 * 5, 0);
   gl.vertexAttribPointer(aTextCoordLoc, 2, gl.FLOAT, false, 4 * 5, 2 * 4);
+  gl.vertexAttribPointer(aDepth, 1, gl.FLOAT, false, 4 * 5, 4 * 4);
 
   gl.drawArrays(gl.TRIANGLES, 0, bufferData.length);
 };

@@ -1,5 +1,11 @@
 import { Position } from "./Position";
 
+/*
+build vertical atlas with:
+    magick mario_original.png -crop 16x16  +repage  +adjoin  mario_tiles_%010d.png
+    magick montage -mode concatenate -tile 1x  mario_tiles_*.png -background none mario.png
+*/
+
 const loadImage = (name: string) =>
     new Promise<HTMLImageElement>((resolve) => {
         const image = new Image();
@@ -51,6 +57,9 @@ export class Atlas {
 
     public build(): Float32Array {
         const totalTiles = this.data.layers.reduce<number>((prev, elem) => prev + elem.tiles.length, 0);
+        const minX = this.data.layers.reduce<number>((prev, elem) => Math.min(prev, elem.tiles.reduce((a, b) => Math.min(a, b.x), 10000)), 10000);
+        const minY = this.data.layers.reduce<number>((prev, elem) => Math.min(prev, elem.tiles.reduce((a, b) => Math.min(a, b.y), 10000)), 10000);
+        const maxY = this.data.layers.reduce<number>((prev, elem) => Math.max(prev, elem.tiles.reduce((a, b) => Math.max(a, b.y), -10000)), -10000);
 
         // each tile is represented by 6 vertices. 
         // Each vertice contains positions (x, y) uv mapping (u, v) and index representing the position
@@ -70,15 +79,15 @@ export class Atlas {
             for (var tileIndex = 0; tileIndex < layer.tiles.length; tileIndex++)
             {
                 tile = layer.tiles[tileIndex];
-                position.set(tile.x * this.data.tileSize, tile.y * this.data.tileSize);
+                position.set(tile.x * this.data.tileSize - minX, maxY - minY - tile.y * this.data.tileSize);
 
                 result.set([
-                    position.x,                         position.y,                          0, 0,       Number.parseFloat(tile.id),
-                    position.x + this.data.tileSize,    position.y + this.data.tileSize,     1, 1,       Number.parseFloat(tile.id),
-                    position.x,                         position.y + this.data.tileSize,     0, 1,       Number.parseFloat(tile.id),
-                    position.x,                         position.y,                          0, 0,       Number.parseFloat(tile.id),
-                    position.x + this.data.tileSize,    position.y + this.data.tileSize,     1, 1,       Number.parseFloat(tile.id),
-                    position.x + this.data.tileSize,    position.y,                          1, 0,       Number.parseFloat(tile.id)
+                    position.x,                         position.y,                          0, 0,       119 - Number.parseFloat(tile.id),
+                    position.x + this.data.tileSize,    position.y + this.data.tileSize,     1, 1,       119 - Number.parseFloat(tile.id),
+                    position.x,                         position.y + this.data.tileSize,     0, 1,       119 - Number.parseFloat(tile.id),
+                    position.x,                         position.y,                          0, 0,       119 - Number.parseFloat(tile.id),
+                    position.x + this.data.tileSize,    position.y + this.data.tileSize,     1, 1,       119 - Number.parseFloat(tile.id),
+                    position.x + this.data.tileSize,    position.y,                          1, 0,       119 - Number.parseFloat(tile.id)
                 ], (offset++) * infoPerTile);
             }
         }
