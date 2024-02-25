@@ -1,51 +1,15 @@
 import { Atlas } from "./Atlas";
 
-const vertexShaderSource = `#version 300 es
-#pragma vscode_glsllint_stage: vert
-
-layout(location = 0) in vec3 aPosition;
-layout(location = 1) in vec2 aTextCoord;
-layout(location = 2) in vec3 aOffset;
-layout(location = 3) in float aDepth;
-layout(location = 4) in vec2 aAnimation; // x: tickPerFrame, y: number of frames
-
-uniform vec2 canvas;
-uniform float uTick;
-
-out vec2 vTextCoord;
-out float vDepth;
-
-void main()
-{
-    vTextCoord = aTextCoord;
-    vDepth = aDepth + mod(floor(uTick / max(aAnimation.x, 1.0)), max(aAnimation.y, 1.0));
-    gl_Position = vec4((aPosition.xyz + aOffset) * vec3(1.0 / canvas.x, 1.0 / canvas.y, 1.0) - vec3(1, 1, 0), 1.0);
-}`;
-
-const fragmentShaderSource = `#version 300 es
-#pragma vscode_glsllint_stage: frag
-
-precision mediump float;
-
-in vec2 vTextCoord;
-in float vDepth;
-uniform mediump sampler2DArray uSampler;
-
-out vec4 fragColor;
-
-void main()
-{
-    fragColor = texture(uSampler, vec3(vTextCoord, vDepth));
-}`;
-
-const loadShader = (
+const loadShader = async (
   gl: WebGL2RenderingContext,
   program: WebGLProgram,
   type: number,
-  source: string,
-): WebGLShader => {
-  const shader = gl.createShader(type)!;
+  name: string,
+): Promise<WebGLShader> => {
+  const file = await fetch(`./shaders/${name}.glsl`);
+  const source = await file.text();
 
+  const shader = gl.createShader(type)!;
   gl.shaderSource(shader, source);
   gl.compileShader(shader);
   gl.attachShader(program, shader);
@@ -53,11 +17,11 @@ const loadShader = (
   return shader;
 };
 
-const buildProgram = (gl: WebGL2RenderingContext): WebGLProgram => {
+const buildProgram = async (gl: WebGL2RenderingContext): Promise<WebGLProgram> => {
   const program = gl.createProgram()!;
 
-  const vertexShader = loadShader(gl, program, gl.VERTEX_SHADER, vertexShaderSource);
-  const fragmentShader = loadShader(gl, program, gl.FRAGMENT_SHADER, fragmentShaderSource);
+  const vertexShader = await loadShader(gl, program, gl.VERTEX_SHADER, "vertex");
+  const fragmentShader = await loadShader(gl, program, gl.FRAGMENT_SHADER, "fragment");
 
   gl.linkProgram(program);
 
@@ -139,7 +103,7 @@ class EntityData {
 const run = async () => {
   const canvas = document.querySelector("canvas")!;
   const gl = canvas.getContext("webgl2")!;
-  const program = buildProgram(gl);
+  const program = await buildProgram(gl);
 
   gl.enable(gl.BLEND);
   gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);

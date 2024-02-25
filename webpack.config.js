@@ -22,7 +22,10 @@ module.exports = {
       template: "./public/index.html",
     }),
     new CopyPlugin({
-      patterns: [{ from: "./public/textures", to: "./textures" }],
+      patterns: [
+        { from: "./public/textures", to: "./textures" },
+        { from: "./src/shaders", to: "./shaders" },
+      ],
     }),
   ],
   resolve: {
