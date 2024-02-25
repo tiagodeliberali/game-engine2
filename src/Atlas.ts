@@ -57,7 +57,9 @@ export class Atlas {
       const data = await loadData(name);    
       const image = await loadImage(name);
     
-      return new Atlas(image, data);
+      const atlas = new Atlas(image, data);
+
+      return atlas.build();
     }
 
     public build(): AtlasVertexBuffer {
@@ -95,16 +97,18 @@ export class Atlas {
                 ], (offset++) * Atlas.ITEMS_PER_TRANSFORM_BUFFER);
             }
         }
-        return new AtlasVertexBuffer(modelBuffer, transformBuffer);
+        return new AtlasVertexBuffer(modelBuffer, transformBuffer, this.image);
     }
   }
 
   export class AtlasVertexBuffer {
     modelBuffer: Float32Array;
     transformBuffer: Float32Array;
+    image: HTMLImageElement;
 
-    constructor(modelBuffer: Float32Array, transformBuffer: Float32Array) {
+    constructor(modelBuffer: Float32Array, transformBuffer: Float32Array, image: HTMLImageElement) {
         this.modelBuffer = modelBuffer;
         this.transformBuffer = transformBuffer;
+        this.image = image;
     }
   }

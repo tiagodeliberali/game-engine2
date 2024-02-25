@@ -1,5 +1,5 @@
 import { AnimationEntity } from "./Animation";
-import { Atlas } from "./Atlas";
+import { Atlas, AtlasVertexBuffer } from "./Atlas";
 import { EntityData, EntityManager } from "./EntityManager";
 
 const loadShader = async (
@@ -37,51 +37,36 @@ const buildProgram = async (gl: WebGL2RenderingContext): Promise<WebGLProgram> =
   return program;
 };
 
+const aPositionLoc = 0;
+const aTextCoordLoc = 1;
+const aOffset = 2;
+const aDepth = 3;
 
-
-const run = async () => {
-  const canvas = document.querySelector("canvas")!;
-  const gl = canvas.getContext("webgl2")!;
-  const program = await buildProgram(gl);
-
-  gl.enable(gl.BLEND);
-  gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
-
-  gl.uniform2fv(gl.getUniformLocation(program, "canvas"), [canvas.width / 2, canvas.height / 2]);
-
-  const aPositionLoc = 0;
-  const aTextCoordLoc = 1;
-  const aOffset = 2;
-  const aDepth = 3;
-
-  const marioAtlas = await Atlas.load("mario");
-
-  const marioTexture = gl.createTexture();
-  gl.bindTexture(gl.TEXTURE_2D_ARRAY, marioTexture);
+const loadAtlas = (gl: WebGL2RenderingContext, atlasData: AtlasVertexBuffer) => {
+  const atlasTexture = gl.createTexture();
+  gl.bindTexture(gl.TEXTURE_2D_ARRAY, atlasTexture);
   gl.texImage3D(
     gl.TEXTURE_2D_ARRAY, 
     0, 
     gl.RGBA, 
-    marioAtlas.image.width, // width of the image
-    marioAtlas.image.width, // height of the image: since we are using a vertical atlas with squared tiles, we will consider that each tile height == tile width
-    marioAtlas.image.height / marioAtlas.image.width, // the number of tiles is height / width
+    atlasData.image.width, // width of the image
+    atlasData.image.width, // height of the image: since we are using a vertical atlas with squared tiles, we will consider that each tile height == tile width
+    atlasData.image.height / atlasData.image.width, // the number of tiles is height / width
     0, 
     gl.RGBA, 
     gl.UNSIGNED_BYTE, 
-    marioAtlas.image);
+    atlasData.image);
 
   gl.generateMipmap(gl.TEXTURE_2D_ARRAY);
   gl.texParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
   gl.texParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
-
-  const bufferData = marioAtlas.build();
 
   const atlasVAO = gl.createVertexArray();
   gl.bindVertexArray(atlasVAO);
 
   const modelBuffer = gl.createBuffer();
   gl.bindBuffer(gl.ARRAY_BUFFER, modelBuffer);
-  gl.bufferData(gl.ARRAY_BUFFER, bufferData.modelBuffer, gl.STATIC_DRAW);
+  gl.bufferData(gl.ARRAY_BUFFER, atlasData.modelBuffer, gl.STATIC_DRAW);
   gl.vertexAttribPointer(aPositionLoc, 2, gl.FLOAT, false, Atlas.ITEMS_PER_MODEL_BUFFER * Float32Array.BYTES_PER_ELEMENT, 0);
   gl.vertexAttribPointer(aTextCoordLoc, 2, gl.FLOAT, false, Atlas.ITEMS_PER_MODEL_BUFFER * Float32Array.BYTES_PER_ELEMENT, 2 * Float32Array.BYTES_PER_ELEMENT);
   gl.enableVertexAttribArray(aPositionLoc);
@@ -89,7 +74,7 @@ const run = async () => {
 
   const transformBuffer = gl.createBuffer();
   gl.bindBuffer(gl.ARRAY_BUFFER, transformBuffer);
-  gl.bufferData(gl.ARRAY_BUFFER, bufferData.transformBuffer, gl.STATIC_DRAW);
+  gl.bufferData(gl.ARRAY_BUFFER, atlasData.transformBuffer, gl.STATIC_DRAW);
   gl.vertexAttribPointer(aOffset, 3, gl.FLOAT, false, Atlas.ITEMS_PER_TRANSFORM_BUFFER * Float32Array.BYTES_PER_ELEMENT, 0);
   gl.vertexAttribPointer(aDepth, 1, gl.FLOAT, false, Atlas.ITEMS_PER_TRANSFORM_BUFFER * Float32Array.BYTES_PER_ELEMENT, 3 * Float32Array.BYTES_PER_ELEMENT);
   gl.enableVertexAttribArray(aOffset);
@@ -99,6 +84,26 @@ const run = async () => {
   gl.vertexAttribDivisor(aDepth, 1);
 
   gl.bindVertexArray(null);
+
+  return [atlasVAO!, modelBuffer!];
+}
+
+const run = async () => {
+  const canvas = document.querySelector("canvas")!;
+  const gl = canvas.getContext("webgl2")!;
+  const program = await buildProgram(gl);
+
+  gl.enable(gl.BLEND);
+  gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+  gl.uniform2fv(gl.getUniformLocation(program, "canvas"), [canvas.width / 2, canvas.height / 2]);
+
+  
+
+  const atlasData = await Atlas.load("mario");
+  
+  const [atlasVAO, modelBuffer] = loadAtlas(gl, atlasData);
+
+  
 
   
   
@@ -153,9 +158,9 @@ const run = async () => {
       gl.uniform1f(uTick, uTickValue++);
 
       gl.bindVertexArray(atlasVAO);
-      gl.drawArraysInstanced(gl.TRIANGLES, 0, bufferData.modelBuffer.length / Atlas.ITEMS_PER_MODEL_BUFFER, bufferData.transformBuffer.length / Atlas.ITEMS_PER_TRANSFORM_BUFFER);
+      gl.drawArraysInstanced(gl.TRIANGLES, 0, atlasData.modelBuffer.length / Atlas.ITEMS_PER_MODEL_BUFFER, atlasData.transformBuffer.length / Atlas.ITEMS_PER_TRANSFORM_BUFFER);
       gl.bindVertexArray(entitiesVAO);
-      gl.drawArraysInstanced(gl.TRIANGLES, 0, bufferData.modelBuffer.length / Atlas.ITEMS_PER_MODEL_BUFFER, entityTransformBufferData.length / EntityManager.ITEMS_PER_TRANSFORM_BUFFER);
+      gl.drawArraysInstanced(gl.TRIANGLES, 0, atlasData.modelBuffer.length / Atlas.ITEMS_PER_MODEL_BUFFER, entityTransformBufferData.length / EntityManager.ITEMS_PER_TRANSFORM_BUFFER);
       gl.bindVertexArray(null);
 
       if (uTickValue > 10000)
