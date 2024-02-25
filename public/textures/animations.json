@@ -3,6 +3,6 @@
         "name": "coin_spinning",
         "start": 13,
         "duration": 2,
-        "ticksPerFrame": 5
+        "ticksPerFrame": 15
     }
 ]

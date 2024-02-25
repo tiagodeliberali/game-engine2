@@ -182,6 +182,9 @@ const run = async () => {
 
   const bufferData = marioAtlas.build();
 
+  const atlasVAO = gl.createVertexArray();
+  gl.bindVertexArray(atlasVAO);
+
   const modelBuffer = gl.createBuffer();
   gl.bindBuffer(gl.ARRAY_BUFFER, modelBuffer);
   gl.bufferData(gl.ARRAY_BUFFER, bufferData.modelBuffer, gl.STATIC_DRAW);
@@ -201,9 +204,10 @@ const run = async () => {
   gl.vertexAttribDivisor(aOffset, 1);
   gl.vertexAttribDivisor(aDepth, 1);
 
+  gl.bindVertexArray(null);
+
   
   
-  gl.drawArraysInstanced(gl.TRIANGLES, 0, bufferData.modelBuffer.length / Atlas.ITEMS_PER_MODEL_BUFFER, bufferData.transformBuffer.length / Atlas.ITEMS_PER_TRANSFORM_BUFFER);
 
   const aAnimation = 4;
 
@@ -215,6 +219,17 @@ const run = async () => {
 
   const entityTransformBufferData = entityManager.build();
 
+
+
+  const entitiesVAO = gl.createVertexArray();
+  gl.bindVertexArray(entitiesVAO);
+
+  gl.bindBuffer(gl.ARRAY_BUFFER, modelBuffer);
+  // gl.bufferData(gl.ARRAY_BUFFER, bufferData.modelBuffer, gl.STATIC_DRAW); !!! NOT SENDING DATA AGAIN !!!
+  gl.vertexAttribPointer(aPositionLoc, 2, gl.FLOAT, false, Atlas.ITEMS_PER_MODEL_BUFFER * Float32Array.BYTES_PER_ELEMENT, 0);
+  gl.vertexAttribPointer(aTextCoordLoc, 2, gl.FLOAT, false, Atlas.ITEMS_PER_MODEL_BUFFER * Float32Array.BYTES_PER_ELEMENT, 2 * Float32Array.BYTES_PER_ELEMENT);
+  gl.enableVertexAttribArray(aPositionLoc);
+  gl.enableVertexAttribArray(aTextCoordLoc);
 
   const entityTransformBuffer = gl.createBuffer();
   gl.bindBuffer(gl.ARRAY_BUFFER, entityTransformBuffer);
@@ -230,11 +245,29 @@ const run = async () => {
   gl.vertexAttribDivisor(aDepth, 1);
   gl.vertexAttribDivisor(aAnimation, 1);
 
+  gl.bindVertexArray(null);
+
+
+
+
   const uTick = gl.getUniformLocation(program, "uTick");
-  gl.uniform1f(uTick, 5);
-  
-  gl.drawArraysInstanced(gl.TRIANGLES, 0, bufferData.modelBuffer.length / Atlas.ITEMS_PER_MODEL_BUFFER, entityTransformBufferData.length / EntityManager.ITEMS_PER_TRANSFORM_BUFFER);
-  
+  var uTickValue = 0; 
+
+
+
+    const draw = () => {
+      gl.uniform1f(uTick, uTickValue++);
+
+      gl.bindVertexArray(atlasVAO);
+      gl.drawArraysInstanced(gl.TRIANGLES, 0, bufferData.modelBuffer.length / Atlas.ITEMS_PER_MODEL_BUFFER, bufferData.transformBuffer.length / Atlas.ITEMS_PER_TRANSFORM_BUFFER);
+      gl.bindVertexArray(entitiesVAO);
+      gl.drawArraysInstanced(gl.TRIANGLES, 0, bufferData.modelBuffer.length / Atlas.ITEMS_PER_MODEL_BUFFER, entityTransformBufferData.length / EntityManager.ITEMS_PER_TRANSFORM_BUFFER);
+      gl.bindVertexArray(null);
+
+      requestAnimationFrame(draw);
+    }
+
+    draw();
 };
 
 run();
