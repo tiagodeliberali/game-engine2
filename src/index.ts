@@ -19,7 +19,9 @@ const loadShader = async (
   return shader;
 };
 
-const buildProgram = async (gl: WebGL2RenderingContext): Promise<WebGLProgram> => {
+const buildProgram = async (canvasName: string): Promise<[WebGL2RenderingContext, WebGLProgram]> => {
+  const canvas = document.querySelector<HTMLCanvasElement>(canvasName)!;
+  const gl = canvas.getContext("webgl2")!;
   const program = gl.createProgram()!;
 
   const vertexShader = await loadShader(gl, program, gl.VERTEX_SHADER, "vertex");
@@ -34,13 +36,19 @@ const buildProgram = async (gl: WebGL2RenderingContext): Promise<WebGLProgram> =
 
   gl.useProgram(program);
 
-  return program;
+  gl.enable(gl.BLEND);
+  gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+  gl.uniform2fv(gl.getUniformLocation(program, "canvas"), [canvas.width / 2, canvas.height / 2]);
+
+  return [gl!, program!];
 };
 
+// Shaders addresses
 const aPositionLoc = 0;
 const aTextCoordLoc = 1;
 const aOffset = 2;
 const aDepth = 3;
+const aAnimation = 4;
 
 const loadAtlas = (gl: WebGL2RenderingContext, atlasData: AtlasVertexBuffer) => {
   const atlasTexture = gl.createTexture();
@@ -88,43 +96,11 @@ const loadAtlas = (gl: WebGL2RenderingContext, atlasData: AtlasVertexBuffer) => 
   return [atlasVAO!, modelBuffer!];
 }
 
-const run = async () => {
-  const canvas = document.querySelector("canvas")!;
-  const gl = canvas.getContext("webgl2")!;
-  const program = await buildProgram(gl);
-
-  gl.enable(gl.BLEND);
-  gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
-  gl.uniform2fv(gl.getUniformLocation(program, "canvas"), [canvas.width / 2, canvas.height / 2]);
-
-  
-
-  const atlasData = await Atlas.load("mario");
-  
-  const [atlasVAO, modelBuffer] = loadAtlas(gl, atlasData);
-
-  
-
-  
-  
-
-  const aAnimation = 4;
-
-  const animations = await AnimationEntity.load("animations");
-  const entityManager = new EntityManager();
-
-  entityManager.set("coin1", new EntityData(7 * 16, 4 * 16, animations.get("coin_spinning")));
-  entityManager.set("coin2", new EntityData(7 * 16, 5 * 16, animations.get("coin_spinning")));
-
-  const entityTransformBufferData = entityManager.build();
-
-
-
+const loadEntities = (gl: WebGL2RenderingContext, modelBuffer: WebGLVertexArrayObject, entityTransformBufferData: Float32Array) => {
   const entitiesVAO = gl.createVertexArray();
   gl.bindVertexArray(entitiesVAO);
 
   gl.bindBuffer(gl.ARRAY_BUFFER, modelBuffer);
-  // gl.bufferData(gl.ARRAY_BUFFER, bufferData.modelBuffer, gl.STATIC_DRAW); !!! NOT SENDING DATA AGAIN !!!
   gl.vertexAttribPointer(aPositionLoc, 2, gl.FLOAT, false, Atlas.ITEMS_PER_MODEL_BUFFER * Float32Array.BYTES_PER_ELEMENT, 0);
   gl.vertexAttribPointer(aTextCoordLoc, 2, gl.FLOAT, false, Atlas.ITEMS_PER_MODEL_BUFFER * Float32Array.BYTES_PER_ELEMENT, 2 * Float32Array.BYTES_PER_ELEMENT);
   gl.enableVertexAttribArray(aPositionLoc);
@@ -146,15 +122,28 @@ const run = async () => {
 
   gl.bindVertexArray(null);
 
+  return entitiesVAO;
+}
 
+const run = async () => {
+  const [gl, program] = await buildProgram("canvas");
 
+  const atlasData = await Atlas.load("mario");
+  const [atlasVAO, atlasModelBuffer] = loadAtlas(gl, atlasData);
+
+  const animations = await AnimationEntity.load("animations");
+
+  const entityManager = new EntityManager();
+  entityManager.set("coin1", new EntityData(7 * 16, 4 * 16, animations.get("coin_spinning")));
+  entityManager.set("coin2", new EntityData(7 * 16, 5 * 16, animations.get("coin_spinning")));
+
+  const entityTransformBufferData = entityManager.build();
+  const entitiesVAO = loadEntities(gl, atlasModelBuffer, entityTransformBufferData);
 
   const uTick = gl.getUniformLocation(program, "uTick");
   var uTickValue = 0; 
-
-
-
-    const draw = () => {
+  
+  const draw = () => {
       gl.uniform1f(uTick, uTickValue++);
 
       gl.bindVertexArray(atlasVAO);
