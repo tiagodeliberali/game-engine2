@@ -1,4 +1,6 @@
+import { AnimationEntity } from "./Animation";
 import { Atlas } from "./Atlas";
+import { EntityData, EntityManager } from "./EntityManager";
 
 const loadShader = async (
   gl: WebGL2RenderingContext,
@@ -35,70 +37,7 @@ const buildProgram = async (gl: WebGL2RenderingContext): Promise<WebGLProgram> =
   return program;
 };
 
-class AnimationEntity {
-    animations: Map<string, Animation>;
 
-    private constructor(data: [Animation]) {
-      this.animations = new Map<string, Animation>();
-      data.forEach((item) => this.animations.set(item.name, item));
-    }
-
-    public static async load<AnimationEntity>(name: string) {
-      const file = await fetch(`./textures/${name}.json`);
-      const data = await file.json();
-      return new AnimationEntity(data);
-    }
-    public get(name: string): Animation {
-      return this.animations.get(name)!;
-    }
-}
-
-class Animation {
-    name!: string;
-    start!: number;
-    duration!: number;
-    ticksPerFrame!: number;
-}
-
-class EntityManager {
-  public static ITEMS_PER_TRANSFORM_BUFFER: number = 6;
-
-  entities: Map<string, EntityData>;
-
-  constructor() {
-    this.entities = new Map<string, EntityData>();
-  }
-
-  public set(id: string, data: EntityData) {
-    this.entities.set(id, data);
-  }
-
-  public build(): Float32Array {
-    const transformBuffer = new Float32Array(this.entities.size * EntityManager.ITEMS_PER_TRANSFORM_BUFFER);
-
-    var offset = 0;
-
-    Array.from(this.entities.values()).forEach((item) => {
-      transformBuffer.set([
-        item.x, item.y, 0.001, item.animation.start, item.animation.ticksPerFrame, item.animation.duration
-      ], (offset++) * EntityManager.ITEMS_PER_TRANSFORM_BUFFER);
-    });
-
-    return transformBuffer;
-  }
-}
-
-class EntityData {
-  x: number;
-  y: number;
-  animation: Animation;
-
-  constructor(x: number, y: number, animation: Animation) {
-    this.x = x;
-    this.y = y;
-    this.animation = animation;
-  }
-}
 
 const run = async () => {
   const canvas = document.querySelector("canvas")!;
