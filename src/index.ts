@@ -255,6 +255,11 @@ const run = async () => {
       gl.drawArraysInstanced(gl.TRIANGLES, 0, bufferData.modelBuffer.length / Atlas.ITEMS_PER_MODEL_BUFFER, entityTransformBufferData.length / EntityManager.ITEMS_PER_TRANSFORM_BUFFER);
       gl.bindVertexArray(null);
 
+      if (uTickValue > 10000)
+      {
+        uTickValue = 0;
+      }
+
       requestAnimationFrame(draw);
     }
 
