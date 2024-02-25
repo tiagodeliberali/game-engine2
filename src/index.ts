@@ -7,16 +7,19 @@ layout(location = 0) in vec3 aPosition;
 layout(location = 1) in vec2 aTextCoord;
 layout(location = 2) in vec3 aOffset;
 layout(location = 3) in float aDepth;
+layout(location = 4) in vec2 aAnimation;
 
 uniform vec2 canvas;
 
 out vec2 vTextCoord;
 out float vDepth;
+out vec2 vAnimation;
 
 void main()
 {
     vTextCoord = aTextCoord;
     vDepth = aDepth;
+    vAnimation = aAnimation;
     gl_Position = vec4((aPosition.xyz + aOffset) * vec3(1.0 / canvas.x, 1.0 / canvas.y, 1.0) - vec3(1, 1, 0), 1.0);
 }`;
 
@@ -27,13 +30,21 @@ precision mediump float;
 
 in vec2 vTextCoord;
 in float vDepth;
+in vec2 vAnimation; // x: tickPerFrame, y: number of frames
 uniform mediump sampler2DArray uSampler;
+uniform float uTick;
 
 out vec4 fragColor;
 
 void main()
 {
-    fragColor = texture(uSampler, vec3(vTextCoord, vDepth));
+    fragColor = texture(uSampler, 
+      vec3(
+        vTextCoord, 
+        vDepth 
+        + mod(floor(uTick / max(vAnimation.x, 1.0)), max(vAnimation.y, 1.0))
+      )
+    );
 }`;
 
 const loadShader = (
@@ -69,10 +80,78 @@ const buildProgram = (gl: WebGL2RenderingContext): WebGLProgram => {
   return program;
 };
 
+class AnimationEntity {
+    animations: Map<string, Animation>;
+
+    private constructor(data: [Animation]) {
+      this.animations = new Map<string, Animation>();
+      data.forEach((item) => this.animations.set(item.name, item));
+    }
+
+    public static async load<AnimationEntity>(name: string) {
+      const file = await fetch(`./textures/${name}.json`);
+      const data = await file.json();
+      return new AnimationEntity(data);
+    }
+    public get(name: string): Animation {
+      return this.animations.get(name)!;
+    }
+}
+
+class Animation {
+    name!: string;
+    start!: number;
+    duration!: number;
+    ticksPerFrame!: number;
+}
+
+class EntityManager {
+  public static ITEMS_PER_TRANSFORM_BUFFER: number = 6;
+
+  entities: Map<string, EntityData>;
+
+  constructor() {
+    this.entities = new Map<string, EntityData>();
+  }
+
+  public set(id: string, data: EntityData) {
+    this.entities.set(id, data);
+  }
+
+  public build(): Float32Array {
+    const transformBuffer = new Float32Array(this.entities.size * EntityManager.ITEMS_PER_TRANSFORM_BUFFER);
+
+    var offset = 0;
+
+    Array.from(this.entities.values()).forEach((item) => {
+      transformBuffer.set([
+        item.x, item.y, 0.001, item.animation.start, item.animation.ticksPerFrame, item.animation.duration
+      ], (offset++) * EntityManager.ITEMS_PER_TRANSFORM_BUFFER);
+    });
+
+    return transformBuffer;
+  }
+}
+
+class EntityData {
+  x: number;
+  y: number;
+  animation: Animation;
+
+  constructor(x: number, y: number, animation: Animation) {
+    this.x = x;
+    this.y = y;
+    this.animation = animation;
+  }
+}
+
 const run = async () => {
   const canvas = document.querySelector("canvas")!;
   const gl = canvas.getContext("webgl2")!;
   const program = buildProgram(gl);
+
+  gl.enable(gl.BLEND);
+  gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
 
   gl.uniform2fv(gl.getUniformLocation(program, "canvas"), [canvas.width / 2, canvas.height / 2]);
 
@@ -106,26 +185,56 @@ const run = async () => {
   const modelBuffer = gl.createBuffer();
   gl.bindBuffer(gl.ARRAY_BUFFER, modelBuffer);
   gl.bufferData(gl.ARRAY_BUFFER, bufferData.modelBuffer, gl.STATIC_DRAW);
-  gl.vertexAttribPointer(aPositionLoc, 2, gl.FLOAT, false, 4 * Float32Array.BYTES_PER_ELEMENT, 0);
-  gl.vertexAttribPointer(aTextCoordLoc, 2, gl.FLOAT, false, 4 * Float32Array.BYTES_PER_ELEMENT, 2 * Float32Array.BYTES_PER_ELEMENT);
+  gl.vertexAttribPointer(aPositionLoc, 2, gl.FLOAT, false, Atlas.ITEMS_PER_MODEL_BUFFER * Float32Array.BYTES_PER_ELEMENT, 0);
+  gl.vertexAttribPointer(aTextCoordLoc, 2, gl.FLOAT, false, Atlas.ITEMS_PER_MODEL_BUFFER * Float32Array.BYTES_PER_ELEMENT, 2 * Float32Array.BYTES_PER_ELEMENT);
   gl.enableVertexAttribArray(aPositionLoc);
   gl.enableVertexAttribArray(aTextCoordLoc);
 
   const transformBuffer = gl.createBuffer();
   gl.bindBuffer(gl.ARRAY_BUFFER, transformBuffer);
   gl.bufferData(gl.ARRAY_BUFFER, bufferData.transformBuffer, gl.STATIC_DRAW);
-  gl.vertexAttribPointer(aOffset, 3, gl.FLOAT, false, 4 * Float32Array.BYTES_PER_ELEMENT, 0);
-  gl.vertexAttribPointer(aDepth, 1, gl.FLOAT, false, 4 * Float32Array.BYTES_PER_ELEMENT, 3 * Float32Array.BYTES_PER_ELEMENT);
+  gl.vertexAttribPointer(aOffset, 3, gl.FLOAT, false, Atlas.ITEMS_PER_TRANSFORM_BUFFER * Float32Array.BYTES_PER_ELEMENT, 0);
+  gl.vertexAttribPointer(aDepth, 1, gl.FLOAT, false, Atlas.ITEMS_PER_TRANSFORM_BUFFER * Float32Array.BYTES_PER_ELEMENT, 3 * Float32Array.BYTES_PER_ELEMENT);
   gl.enableVertexAttribArray(aOffset);
   gl.enableVertexAttribArray(aDepth);
 
   gl.vertexAttribDivisor(aOffset, 1);
   gl.vertexAttribDivisor(aDepth, 1);
 
-  gl.enable(gl.BLEND);
-  gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
   
-  gl.drawArraysInstanced(gl.TRIANGLES, 0, bufferData.modelBuffer.length / 4, bufferData.transformBuffer.length / 4);
+  
+  gl.drawArraysInstanced(gl.TRIANGLES, 0, bufferData.modelBuffer.length / Atlas.ITEMS_PER_MODEL_BUFFER, bufferData.transformBuffer.length / Atlas.ITEMS_PER_TRANSFORM_BUFFER);
+
+  const aAnimation = 4;
+
+  const animations = await AnimationEntity.load("animations");
+  const entityManager = new EntityManager();
+
+  entityManager.set("coin1", new EntityData(7 * 16, 4 * 16, animations.get("coin_spinning")));
+  entityManager.set("coin2", new EntityData(7 * 16, 5 * 16, animations.get("coin_spinning")));
+
+  const entityTransformBufferData = entityManager.build();
+
+
+  const entityTransformBuffer = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, entityTransformBuffer);
+  gl.bufferData(gl.ARRAY_BUFFER, entityTransformBufferData, gl.STATIC_DRAW);
+  gl.vertexAttribPointer(aOffset, 3, gl.FLOAT, false, EntityManager.ITEMS_PER_TRANSFORM_BUFFER * Float32Array.BYTES_PER_ELEMENT, 0);
+  gl.vertexAttribPointer(aDepth, 1, gl.FLOAT, false, EntityManager.ITEMS_PER_TRANSFORM_BUFFER * Float32Array.BYTES_PER_ELEMENT, 3 * Float32Array.BYTES_PER_ELEMENT);
+  gl.vertexAttribPointer(aAnimation, 2, gl.FLOAT, false, EntityManager.ITEMS_PER_TRANSFORM_BUFFER * Float32Array.BYTES_PER_ELEMENT, 4 * Float32Array.BYTES_PER_ELEMENT);
+  gl.enableVertexAttribArray(aOffset);
+  gl.enableVertexAttribArray(aDepth);
+  gl.enableVertexAttribArray(aAnimation);
+
+  gl.vertexAttribDivisor(aOffset, 1);
+  gl.vertexAttribDivisor(aDepth, 1);
+  gl.vertexAttribDivisor(aAnimation, 1);
+
+  const uTick = gl.getUniformLocation(program, "uTick");
+  gl.uniform1f(uTick, 5);
+  
+  gl.drawArraysInstanced(gl.TRIANGLES, 0, bufferData.modelBuffer.length / Atlas.ITEMS_PER_MODEL_BUFFER, entityTransformBufferData.length / EntityManager.ITEMS_PER_TRANSFORM_BUFFER);
+  
 };
 
 run();

@@ -4,11 +4,6 @@
     "mapHeight": 14,
     "layers": [
         {
-            "name": "New layer",
-            "tiles": [],
-            "collider": false
-        },
-        {
             "name": "Water",
             "tiles": [
                 {
@@ -748,16 +743,6 @@
                     "id": "14",
                     "x": 18,
                     "y": 10
-                },
-                {
-                    "id": "13",
-                    "x": 7,
-                    "y": 9
-                },
-                {
-                    "id": "13",
-                    "x": 7,
-                    "y": 8
                 },
                 {
                     "id": "15",

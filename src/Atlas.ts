@@ -41,6 +41,9 @@ class Tile {
 }
 
 export class Atlas {
+    public static ITEMS_PER_MODEL_BUFFER: number = 4;
+    public static ITEMS_PER_TRANSFORM_BUFFER: number = 4;
+
     image: HTMLImageElement;
     data: AtlasData;
   
@@ -60,8 +63,7 @@ export class Atlas {
     public build(): AtlasVertexBuffer {
         const totalTiles = this.data.layers.reduce<number>((prev, elem) => prev + elem.tiles.length, 0);
 
-        const infoPerTile = 4;
-        const transformBuffer = new Float32Array(totalTiles * infoPerTile);
+        const transformBuffer = new Float32Array(totalTiles * Atlas.ITEMS_PER_TRANSFORM_BUFFER);
 
         // avoid memory allocation on each iteration
         var layer = new Layer();
@@ -90,7 +92,7 @@ export class Atlas {
                     (this.data.mapHeight - 1 - tile.y) * this.data.tileSize,    // y
                     zUnity * (this.data.layers.length - layerIndex),            // z
                     Number.parseFloat(tile.id),                                 // depth
-                ], (offset++) * infoPerTile);
+                ], (offset++) * Atlas.ITEMS_PER_TRANSFORM_BUFFER);
             }
         }
         return new AtlasVertexBuffer(modelBuffer, transformBuffer);
