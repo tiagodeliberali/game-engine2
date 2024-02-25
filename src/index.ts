@@ -7,19 +7,18 @@ layout(location = 0) in vec3 aPosition;
 layout(location = 1) in vec2 aTextCoord;
 layout(location = 2) in vec3 aOffset;
 layout(location = 3) in float aDepth;
-layout(location = 4) in vec2 aAnimation;
+layout(location = 4) in vec2 aAnimation; // x: tickPerFrame, y: number of frames
 
 uniform vec2 canvas;
+uniform float uTick;
 
 out vec2 vTextCoord;
 out float vDepth;
-out vec2 vAnimation;
 
 void main()
 {
     vTextCoord = aTextCoord;
-    vDepth = aDepth;
-    vAnimation = aAnimation;
+    vDepth = aDepth + mod(floor(uTick / max(aAnimation.x, 1.0)), max(aAnimation.y, 1.0));
     gl_Position = vec4((aPosition.xyz + aOffset) * vec3(1.0 / canvas.x, 1.0 / canvas.y, 1.0) - vec3(1, 1, 0), 1.0);
 }`;
 
@@ -30,21 +29,13 @@ precision mediump float;
 
 in vec2 vTextCoord;
 in float vDepth;
-in vec2 vAnimation; // x: tickPerFrame, y: number of frames
 uniform mediump sampler2DArray uSampler;
-uniform float uTick;
 
 out vec4 fragColor;
 
 void main()
 {
-    fragColor = texture(uSampler, 
-      vec3(
-        vTextCoord, 
-        vDepth 
-        + mod(floor(uTick / max(vAnimation.x, 1.0)), max(vAnimation.y, 1.0))
-      )
-    );
+    fragColor = texture(uSampler, vec3(vTextCoord, vDepth));
 }`;
 
 const loadShader = (
