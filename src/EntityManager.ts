@@ -12,6 +12,15 @@ export class EntityManager {
     public set(id: string, data: EntityData) {
       this.entities.set(id, data);
     }
+
+    update(name: string, updateFunction: (data: EntityData) => void) {
+        const data = this.entities.get(name);
+
+        if (data != undefined)
+        {
+            updateFunction(data);
+        }
+      }
   
     public build(): Float32Array {
       const transformBuffer = new Float32Array(this.entities.size * EntityManager.ITEMS_PER_TRANSFORM_BUFFER);

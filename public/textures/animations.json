@@ -9,24 +9,24 @@
         "name": "character_idle_left",
         "start": 120,
         "duration": 4,
-        "ticksPerFrame": 15
+        "ticksPerFrame": 10
     },
     {
         "name": "character_idle_right",
         "start": 124,
         "duration": 4,
-        "ticksPerFrame": 15
+        "ticksPerFrame": 10
     },
     {
         "name": "character_walk_left",
         "start": 128,
         "duration": 4,
-        "ticksPerFrame": 15
+        "ticksPerFrame": 10
     },
     {
         "name": "character_walk_right",
         "start": 132,
         "duration": 4,
-        "ticksPerFrame": 15
+        "ticksPerFrame": 10
     }
 ]

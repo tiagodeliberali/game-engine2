@@ -1,6 +1,7 @@
 import { AnimationEntity } from "./Animation";
 import { Atlas, AtlasVertexBuffer } from "./Atlas";
 import { EntityData, EntityManager } from "./EntityManager";
+import { Keys, initKeyboard, isKeyPressed } from "./Keyboard";
 
 const loadShader = async (
   gl: WebGL2RenderingContext,
@@ -50,7 +51,7 @@ const aOffset = 2;
 const aDepth = 3;
 const aAnimation = 4;
 
-const loadAtlas = (gl: WebGL2RenderingContext, atlasData: AtlasVertexBuffer) => {
+const loadAtlas = (gl: WebGL2RenderingContext, atlasData: AtlasVertexBuffer): [WebGLVertexArrayObject, WebGLBuffer] => {
   const atlasTexture = gl.createTexture();
   gl.bindTexture(gl.TEXTURE_2D_ARRAY, atlasTexture);
   gl.texImage3D(
@@ -96,7 +97,7 @@ const loadAtlas = (gl: WebGL2RenderingContext, atlasData: AtlasVertexBuffer) => 
   return [atlasVAO!, modelBuffer!];
 }
 
-const loadEntities = (gl: WebGL2RenderingContext, modelBuffer: WebGLVertexArrayObject, entityTransformBufferData: Float32Array) => {
+const loadEntities = (gl: WebGL2RenderingContext, modelBuffer: WebGLVertexArrayObject, entityTransformBufferData: Float32Array): [WebGLVertexArrayObject, WebGLBuffer] => {
   const entitiesVAO = gl.createVertexArray();
   gl.bindVertexArray(entitiesVAO);
 
@@ -122,7 +123,7 @@ const loadEntities = (gl: WebGL2RenderingContext, modelBuffer: WebGLVertexArrayO
 
   gl.bindVertexArray(null);
 
-  return entitiesVAO;
+  return [entitiesVAO!, entityTransformBuffer!];
 }
 
 const run = async () => {
@@ -139,10 +140,12 @@ const run = async () => {
   entityManager.set("character", new EntityData(4 * 16, 3 * 16, animations.get("character_walk_right")));
 
   const entityTransformBufferData = entityManager.build();
-  const entitiesVAO = loadEntities(gl, atlasModelBuffer, entityTransformBufferData);
+  const [entitiesVAO, entityTransformBuffer] = loadEntities(gl, atlasModelBuffer, entityTransformBufferData);
 
   const uTick = gl.getUniformLocation(program, "uTick");
-  var uTickValue = 0; 
+  var uTickValue = 0;
+
+  initKeyboard();
   
   const draw = () => {
       gl.uniform1f(uTick, uTickValue++);
@@ -156,6 +159,16 @@ const run = async () => {
       if (uTickValue > 10000)
       {
         uTickValue = 0;
+      }
+
+      if (isKeyPressed(Keys.ArrowRight)) {
+        entityManager.update("character", (data) => { data.x += 1; data.animation = animations.get("character_walk_right") });
+        gl.bindBuffer(gl.ARRAY_BUFFER, entityTransformBuffer);
+        gl.bufferData(gl.ARRAY_BUFFER, entityManager.build(), gl.STATIC_DRAW);
+      } else if (isKeyPressed(Keys.ArrowLeft)) {
+        entityManager.update("character", (data) => { data.x += -1; data.animation = animations.get("character_walk_left") });
+        gl.bindBuffer(gl.ARRAY_BUFFER, entityTransformBuffer);
+        gl.bufferData(gl.ARRAY_BUFFER, entityManager.build(), gl.STATIC_DRAW);
       }
 
       requestAnimationFrame(draw);
