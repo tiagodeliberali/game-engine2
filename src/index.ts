@@ -136,6 +136,7 @@ const run = async () => {
   const entityManager = new EntityManager();
   entityManager.set("coin1", new EntityData(7 * 16, 4 * 16, animations.get("coin_spinning")));
   entityManager.set("coin2", new EntityData(7 * 16, 5 * 16, animations.get("coin_spinning")));
+  entityManager.set("character", new EntityData(4 * 16, 3 * 16, animations.get("character_walk_right")));
 
   const entityTransformBufferData = entityManager.build();
   const entitiesVAO = loadEntities(gl, atlasModelBuffer, entityTransformBufferData);
