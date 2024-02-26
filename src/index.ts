@@ -151,9 +151,9 @@ const run = async () => {
       gl.uniform1f(uTick, uTickValue++);
 
       gl.bindVertexArray(atlasVAO);
-      gl.drawArraysInstanced(gl.TRIANGLES, 0, atlasData.modelBuffer.length / Atlas.ITEMS_PER_MODEL_BUFFER, atlasData.transformBuffer.length / Atlas.ITEMS_PER_TRANSFORM_BUFFER);
+      gl.drawArraysInstanced(gl.TRIANGLES, 0, atlasData.modelBufferVertexLength, atlasData.transformBufferVertexLength);
       gl.bindVertexArray(entitiesVAO);
-      gl.drawArraysInstanced(gl.TRIANGLES, 0, atlasData.modelBuffer.length / Atlas.ITEMS_PER_MODEL_BUFFER, entityTransformBufferData.length / EntityManager.ITEMS_PER_TRANSFORM_BUFFER);
+      gl.drawArraysInstanced(gl.TRIANGLES, 0, atlasData.modelBufferVertexLength, entityTransformBufferData.length / EntityManager.ITEMS_PER_TRANSFORM_BUFFER);
       gl.bindVertexArray(null);
 
       if (uTickValue > 10000)

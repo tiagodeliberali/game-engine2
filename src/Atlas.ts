@@ -105,10 +105,15 @@ export class Atlas {
     modelBuffer: Float32Array;
     transformBuffer: Float32Array;
     image: HTMLImageElement;
+    modelBufferVertexLength: number;
+    transformBufferVertexLength: number;
 
     constructor(modelBuffer: Float32Array, transformBuffer: Float32Array, image: HTMLImageElement) {
         this.modelBuffer = modelBuffer;
         this.transformBuffer = transformBuffer;
         this.image = image;
+
+        this.modelBufferVertexLength = this.modelBuffer.length / Atlas.ITEMS_PER_MODEL_BUFFER;
+        this.transformBufferVertexLength = this.transformBuffer.length / Atlas.ITEMS_PER_TRANSFORM_BUFFER;
     }
   }
