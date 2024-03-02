@@ -21,8 +21,9 @@ export class GraphicEntityManager {
 
   public update(name: string, updateFunction: (data: EntityData) => void) {
     const data = this.entities.get(name);
-
+    
     if (data != undefined) {
+      this.pendingChange = true;
       updateFunction(data);
     }
   }
@@ -40,7 +41,7 @@ export class GraphicEntityManager {
 
     Array.from(this.entities.values()).forEach((item) => {
       this.transformBuffer!.set([
-        item.x, item.y, 0.001, item.animation.start, item.animation.ticksPerFrame, item.animation.duration
+        item.x, item.y, 0.001, item.animation.start, item.animation.ticksPerFrame ?? 1, item.animation.duration ?? 0
       ], (offset++) * GraphicEntityManager.ITEMS_PER_TRANSFORM_BUFFER);
     });
 
