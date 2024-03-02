@@ -23,8 +23,10 @@ export class GameObject {
         this.onChangePosition.on(this);
     }
 
-    public updatePosition(updateAction: (x: number, y: number) => {}) {
-        updateAction(this.x, this.y);
+    public updatePosition(updateAction: (x: number, y: number) => [number, number]) {
+        const [x, y] = updateAction(this.x, this.y);
+        this.x = x;
+        this.y = y;
         this.onChangePosition.on(this);
     }
 

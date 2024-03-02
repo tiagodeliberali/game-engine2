@@ -1,5 +1,6 @@
 import { Component } from "../core/Component";
-import { EntityData } from "./EntityManager";
+import { GameObject } from "../core/GameObject";
+import { EntityData, GraphicEntityManager } from "./EntityManager";
 
 export class SpriteEntity {
   sprites: Map<string, SpriteData>;
@@ -32,14 +33,26 @@ export class SpriteComponent extends Component {
   public static readonly Name: string = "SpriteComponent";
   private data: SpriteData;
   entityData: EntityData | undefined;
+  entityManager: GraphicEntityManager | undefined;
 
   constructor(data: SpriteData) {
     super();
     this.data = data;
   }
 
-  public setReferenceInternal(): void {
-    this.entityData = new EntityData(this.gameObject!.x, this.gameObject!.y, this.data)
+  public setReferece(gameObject: GameObject): void {
+    this.entityData = new EntityData(gameObject.x, gameObject.y, this.data);
+    gameObject.subscribeOnChangePosition((gameObject) => this.updateDataOnManager(gameObject));
+  }
+
+  public setManager(entityManager: GraphicEntityManager) {
+    this.entityManager = entityManager;
+  }
+
+  updateDataOnManager(gameObject: GameObject) {
+    this.entityData!.x = gameObject.x;
+    this.entityData!.y = gameObject.y;
+    this.entityManager?.set(gameObject.id, this.entityData!);
   }
 
   public is(name: string): boolean {

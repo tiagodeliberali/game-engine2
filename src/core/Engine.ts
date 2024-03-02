@@ -34,10 +34,11 @@ export class Engine {
     }
 
     private processComponents(gameObject: GameObject) {
-        const em = this.entityManager!;
         for (const component of gameObject.components) {
             if (component.is(SpriteComponent.Name)) {
-                em.set(gameObject.id, (component as SpriteComponent).entityData!);
+                const spriteComponent = component as SpriteComponent;
+                spriteComponent.setManager(this.entityManager!);
+                this.entityManager!.set(gameObject.id, spriteComponent.entityData!);
             }
         }
     }

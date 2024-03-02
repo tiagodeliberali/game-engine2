@@ -1,5 +1,5 @@
 import { Atlas, AtlasVertexBuffer } from "./Atlas";
-import { GraphicEntityManager } from "./EntityManager";
+import { EntityData, GraphicEntityManager, buildEntityDataRow } from "./EntityManager";
 
 const loadShader = async (
     gl: WebGL2RenderingContext,
@@ -175,12 +175,27 @@ export class GraphicProcessor {
         }
 
         if (this.entitiesVAO != undefined) {
-            const [entityTransformBufferData, _] = this.entityManager!.build();
-            this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.entityTransformBuffer!);
-            this.gl.bufferData(this.gl.ARRAY_BUFFER, entityTransformBufferData, this.gl.STATIC_DRAW);
+            const entityDiff = this.entityManager!.diff();
+
+            if (entityDiff.type == "full") {
+                console.info("Diff full");
+                this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.entityTransformBuffer!);
+                this.gl.bufferData(this.gl.ARRAY_BUFFER, entityDiff.data as Float32Array, this.gl.STATIC_DRAW);
+            }
+
+            if (entityDiff.type == "diff") {
+                console.info("Diff partial");
+                this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.entityTransformBuffer!);
+                (entityDiff.data as [number, EntityData][]).forEach(([offset, data]) => {
+                    this.gl.bufferSubData(
+                        this.gl.ARRAY_BUFFER,
+                        offset * Float32Array.BYTES_PER_ELEMENT * GraphicEntityManager.ITEMS_PER_TRANSFORM_BUFFER,
+                        new Float32Array(buildEntityDataRow(data)));
+                });
+            }
 
             this.gl.bindVertexArray(this.entitiesVAO);
-            this.gl.drawArraysInstanced(this.gl.TRIANGLES, 0, this.atlasData!.modelBufferVertexLength, entityTransformBufferData!.length / GraphicEntityManager.ITEMS_PER_TRANSFORM_BUFFER);
+            this.gl.drawArraysInstanced(this.gl.TRIANGLES, 0, this.atlasData!.modelBufferVertexLength, this.entityManager!.size());
         }
 
         this.gl.bindVertexArray(null);

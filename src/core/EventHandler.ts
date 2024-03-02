@@ -1,4 +1,4 @@
-export type OnEvent<T> = (entity: T) => {};
+export type OnEvent<T> = (entity: T) => void;
 
 export class EventHandler<T> {
     private events: Array<OnEvent<T>> = [];
