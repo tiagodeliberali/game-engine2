@@ -6,6 +6,10 @@
         "ticksPerFrame": 15
     },
     {
+        "name": "key",
+        "start": 15
+    },
+    {
         "name": "character_idle_left",
         "start": 120,
         "duration": 4,

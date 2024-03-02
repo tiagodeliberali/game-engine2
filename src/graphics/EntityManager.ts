@@ -1,4 +1,4 @@
-import { AnimationData } from "./Animation";
+import { SpriteData } from "./Sprite";
 import { AtlasVertexBuffer } from "./Atlas";
 
 export class GraphicEntityManager {
@@ -52,9 +52,9 @@ export class GraphicEntityManager {
 export class EntityData {
   x: number;
   y: number;
-  animation: AnimationData;
+  animation: SpriteData;
 
-  constructor(x: number, y: number, animation: AnimationData) {
+  constructor(x: number, y: number, animation: SpriteData) {
     this.x = x;
     this.y = y;
     this.animation = animation;

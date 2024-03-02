@@ -1,29 +1,31 @@
-import { AnimationEntity } from "./graphics/Animation";
 import { Atlas } from "./graphics/Atlas";
-import { EntityData, GraphicEntityManager } from "./graphics/EntityManager";
-import { Keys, initKeyboard, isKeyPressed } from "./Keyboard";
-import { GraphicProcessor } from "./graphics/GraphicProcessor";
+import { Keys, isKeyPressed } from "./Keyboard";
+import { Engine } from "./core/Engine";
+import { GameObject } from "./core/GameObject";
 
 const run = async () => {
-  const graphicProcessor = await GraphicProcessor.build();
+  const atlas = await Atlas.load("mario");
+  
+  const scene = await Engine.build();
+  scene.loadAtlas(atlas);
 
-  const atlasData = await Atlas.load("mario");
-  graphicProcessor.loadAtlas(atlasData);
+  const coin1 = new GameObject(7 * 16, 4 * 16);
+  coin1.add(atlas.getSprite("coin_spinning"));
 
-  const entityManager = new GraphicEntityManager(atlasData);
-  graphicProcessor.loadEntities(entityManager);
+  const coin2 = new GameObject(7 * 16, 5 * 16);
+  coin2.add(atlas.getSprite("coin_spinning"));
 
-  const animations = await AnimationEntity.load("animations");
+  const key = new GameObject(9 * 16, 3 * 16);
+  key.add(atlas.getSprite("key"));
 
-  entityManager.set("coin1", new EntityData(7 * 16, 4 * 16, animations.get("coin_spinning")));
-  entityManager.set("coin2", new EntityData(7 * 16, 5 * 16, animations.get("coin_spinning")));
-  entityManager.set("character", new EntityData(4 * 16, 3 * 16, animations.get("character_walk_right")));
+  const character = new GameObject(4 * 16, 3 * 16);
+  const characterSprite = atlas.getSprite("character_walk_right");
+  character.add(characterSprite);
 
-  initKeyboard();
-
+  scene.add([coin1, coin2, key, character])
+  
   const update = () => {
-    graphicProcessor.draw();
-
+    scene.update();
     requestAnimationFrame(update);
   }
 

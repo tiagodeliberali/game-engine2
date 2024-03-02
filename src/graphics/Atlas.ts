@@ -7,6 +7,9 @@ build vertical atlas with:
     magick montage -mode concatenate -tile 1x  mario_tiles_*.png -background none mario.png
 */
 
+import { Component } from "../core/Component";
+import { SpriteEntity } from "./Sprite";
+
 const zUnity = 0.00001;
 
 const loadImage = (name: string) =>
@@ -17,7 +20,7 @@ const loadImage = (name: string) =>
     });
 
 const loadData = async (name: string): Promise<AtlasData> => {
-    const file = await fetch(`./textures/${name}.json`);
+    const file = await fetch(`./textures/${name}_map.json`);
     return await file.json();
 }
 
@@ -46,17 +49,20 @@ export class Atlas {
 
     image: HTMLImageElement;
     data: AtlasData;
+    sprites: SpriteEntity;
 
-    constructor(image: HTMLImageElement, data: AtlasData) {
+    constructor(image: HTMLImageElement, data: AtlasData, sprites: SpriteEntity) {
         this.image = image;
         this.data = data;
+        this.sprites = sprites;
     }
 
     public static async load(name: string) {
         const data = await loadData(name);
         const image = await loadImage(name);
+        const sprites = await SpriteEntity.load(name);
 
-        const atlas = new Atlas(image, data);
+        const atlas = new Atlas(image, data, sprites);
 
         return atlas.build();
     }
@@ -96,11 +102,13 @@ export class Atlas {
                 ], (offset++) * Atlas.ITEMS_PER_TRANSFORM_BUFFER);
             }
         }
-        return new AtlasVertexBuffer(modelBuffer, transformBuffer, this.image);
+        return new AtlasVertexBuffer(modelBuffer, transformBuffer, this.image, this.sprites);
     }
 }
 
 export class AtlasVertexBuffer {
+    private sprites: SpriteEntity;
+
     modelBuffer: Float32Array;
     transformBuffer: Float32Array;
     image: HTMLImageElement;
@@ -108,12 +116,17 @@ export class AtlasVertexBuffer {
     transformBufferVertexLength: number;
     modelBufferReference: WebGLBuffer | undefined;
 
-    constructor(modelBuffer: Float32Array, transformBuffer: Float32Array, image: HTMLImageElement) {
+    constructor(modelBuffer: Float32Array, transformBuffer: Float32Array, image: HTMLImageElement, sprites: SpriteEntity) {
         this.modelBuffer = modelBuffer;
         this.transformBuffer = transformBuffer;
         this.image = image;
+        this.sprites = sprites;
 
         this.modelBufferVertexLength = this.modelBuffer.length / Atlas.ITEMS_PER_MODEL_BUFFER;
         this.transformBufferVertexLength = this.transformBuffer.length / Atlas.ITEMS_PER_TRANSFORM_BUFFER;
+    }
+
+    public getSprite(name: string): Component {
+        return this.sprites.get(name);
     }
 }
