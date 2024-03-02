@@ -138,7 +138,7 @@ export class GraphicProcessor {
     private entitiesVAO: WebGLVertexArrayObject | undefined;
     private entityTransformBuffer: WebGLBuffer | undefined;
     private entityManager: GraphicEntityManager | undefined;
-    
+
     private constructor(gl: WebGL2RenderingContext, program: WebGLProgram) {
         this.gl = gl;
         this.program = program;
@@ -169,14 +169,12 @@ export class GraphicProcessor {
     public draw() {
         this.gl.uniform1f(this.uTick, this.uTickValue++);
 
-        if (this.atlasVAO != undefined)
-        {
+        if (this.atlasVAO != undefined) {
             this.gl.bindVertexArray(this.atlasVAO);
             this.gl.drawArraysInstanced(this.gl.TRIANGLES, 0, this.atlasData!.modelBufferVertexLength, this.atlasData!.transformBufferVertexLength);
         }
-        
-        if (this.entitiesVAO != undefined)
-        {
+
+        if (this.entitiesVAO != undefined) {
             const [entityTransformBufferData, _] = this.entityManager!.build();
             this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.entityTransformBuffer!);
             this.gl.bufferData(this.gl.ARRAY_BUFFER, entityTransformBufferData, this.gl.STATIC_DRAW);
@@ -187,8 +185,7 @@ export class GraphicProcessor {
 
         this.gl.bindVertexArray(null);
 
-        if (this.uTickValue > 10000)
-        {
+        if (this.uTickValue > 10000) {
             this.uTickValue = 0;
         }
     }

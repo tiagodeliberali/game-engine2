@@ -46,20 +46,19 @@ export class Atlas {
 
     image: HTMLImageElement;
     data: AtlasData;
-  
-    constructor(image: HTMLImageElement, data: AtlasData) {
-      this.image = image;
-      this.data = data;
-    }
-  
-    public static async load(name: string)
-    {
-      const data = await loadData(name);    
-      const image = await loadImage(name);
-    
-      const atlas = new Atlas(image, data);
 
-      return atlas.build();
+    constructor(image: HTMLImageElement, data: AtlasData) {
+        this.image = image;
+        this.data = data;
+    }
+
+    public static async load(name: string) {
+        const data = await loadData(name);
+        const image = await loadImage(name);
+
+        const atlas = new Atlas(image, data);
+
+        return atlas.build();
     }
 
     public build(): AtlasVertexBuffer {
@@ -99,9 +98,9 @@ export class Atlas {
         }
         return new AtlasVertexBuffer(modelBuffer, transformBuffer, this.image);
     }
-  }
+}
 
-  export class AtlasVertexBuffer {
+export class AtlasVertexBuffer {
     modelBuffer: Float32Array;
     transformBuffer: Float32Array;
     image: HTMLImageElement;
@@ -117,4 +116,4 @@ export class Atlas {
         this.modelBufferVertexLength = this.modelBuffer.length / Atlas.ITEMS_PER_MODEL_BUFFER;
         this.transformBufferVertexLength = this.transformBuffer.length / Atlas.ITEMS_PER_TRANSFORM_BUFFER;
     }
-  }
+}
