@@ -49,7 +49,7 @@ const aOffset = 2;
 const aDepth = 3;
 const aAnimation = 4;
 
-const loadAtlas = (gl: WebGL2RenderingContext, atlasData: AtlasVertexBuffer): [WebGLVertexArrayObject, WebGLBuffer] => {
+const loadAtlas = (gl: WebGL2RenderingContext, atlasData: AtlasVertexBuffer): WebGLVertexArrayObject => {
     const atlasTexture = gl.createTexture();
     gl.bindTexture(gl.TEXTURE_2D_ARRAY, atlasTexture);
     gl.texImage3D(
@@ -72,6 +72,7 @@ const loadAtlas = (gl: WebGL2RenderingContext, atlasData: AtlasVertexBuffer): [W
     gl.bindVertexArray(atlasVAO);
 
     const modelBuffer = gl.createBuffer();
+    atlasData.modelBufferReference = modelBuffer!;
     gl.bindBuffer(gl.ARRAY_BUFFER, modelBuffer);
     gl.bufferData(gl.ARRAY_BUFFER, atlasData.modelBuffer, gl.STATIC_DRAW);
     gl.vertexAttribPointer(aPositionLoc, 2, gl.FLOAT, false, Atlas.ITEMS_PER_MODEL_BUFFER * Float32Array.BYTES_PER_ELEMENT, 0);
@@ -92,7 +93,7 @@ const loadAtlas = (gl: WebGL2RenderingContext, atlasData: AtlasVertexBuffer): [W
 
     gl.bindVertexArray(null);
 
-    return [atlasVAO!, modelBuffer!];
+    return atlasVAO!;
 }
 
 const loadEntities = (gl: WebGL2RenderingContext, modelBuffer: WebGLVertexArrayObject, entityTransformBufferData: Float32Array): [WebGLVertexArrayObject, WebGLBuffer] => {
@@ -132,7 +133,6 @@ export class GraphicProcessor {
     private uTickValue: number = 0;
 
     private atlasVAO: WebGLVertexArrayObject | undefined;
-    private atlasModelBuffer: WebGLBuffer | undefined;
     private atlasData: AtlasVertexBuffer | undefined;
 
     private entitiesVAO: WebGLVertexArrayObject | undefined;
@@ -152,15 +152,14 @@ export class GraphicProcessor {
     }
 
     public loadAtlas(atlasData: AtlasVertexBuffer) {
-        const [atlasVAO, atlasModelBuffer] = loadAtlas(this.gl, atlasData);
+        const atlasVAO = loadAtlas(this.gl, atlasData);
         this.atlasVAO = atlasVAO;
-        this.atlasModelBuffer = atlasModelBuffer;
         this.atlasData = atlasData;
     }
 
     public loadEntities(entityManager: GraphicEntityManager) {
-        const entityTransformBufferData = entityManager.build();
-        const [entitiesVAO, entityTransformBuffer] = loadEntities(this.gl, this.atlasModelBuffer!, entityTransformBufferData);
+        const [entityTransformBufferData, atlasModelBuffer] = entityManager.build();
+        const [entitiesVAO, entityTransformBuffer] = loadEntities(this.gl, atlasModelBuffer, entityTransformBufferData);
         this.entitiesVAO = entitiesVAO;
         this.entityTransformBuffer = entityTransformBuffer;
         this.entityManager = entityManager;
@@ -178,7 +177,7 @@ export class GraphicProcessor {
         
         if (this.entitiesVAO != undefined)
         {
-            const entityTransformBufferData = this.entityManager!.build();
+            const [entityTransformBufferData, _] = this.entityManager!.build();
             this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.entityTransformBuffer!);
             this.gl.bufferData(this.gl.ARRAY_BUFFER, entityTransformBufferData, this.gl.STATIC_DRAW);
 

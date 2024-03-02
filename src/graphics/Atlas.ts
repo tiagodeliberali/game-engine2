@@ -107,6 +107,7 @@ export class Atlas {
     image: HTMLImageElement;
     modelBufferVertexLength: number;
     transformBufferVertexLength: number;
+    modelBufferReference: WebGLBuffer | undefined;
 
     constructor(modelBuffer: Float32Array, transformBuffer: Float32Array, image: HTMLImageElement) {
         this.modelBuffer = modelBuffer;

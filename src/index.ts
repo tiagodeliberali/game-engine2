@@ -10,9 +10,7 @@ const run = async () => {
   const atlasData = await Atlas.load("mario");
   graphicProcessor.loadAtlas(atlasData);
 
-  // right now entity manager is tied to atlas, because the model buffer size depends on the tile size defined inside the atlas
-  // need to think how to have multiples atlas, so we can have one atlas for each dimension size, like 16x16, 32x32, etc
-  const entityManager = new GraphicEntityManager();
+  const entityManager = new GraphicEntityManager(atlasData);
   graphicProcessor.loadEntities(entityManager);
 
   const animations = await AnimationEntity.load("animations");

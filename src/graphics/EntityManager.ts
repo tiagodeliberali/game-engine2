@@ -1,4 +1,5 @@
 import { AnimationData } from "./Animation";
+import { AtlasVertexBuffer } from "./Atlas";
 
 export class GraphicEntityManager {
   public static ITEMS_PER_TRANSFORM_BUFFER: number = 6;
@@ -6,9 +7,11 @@ export class GraphicEntityManager {
   private entities: Map<string, EntityData>;
   private pendingChange: boolean = true;
   private transformBuffer: Float32Array | undefined;
+  private atlasData: AtlasVertexBuffer;
 
-  constructor() {
+  constructor(atlasData: AtlasVertexBuffer) {
     this.entities = new Map<string, EntityData>();
+    this.atlasData = atlasData;
   }
 
   public set(id: string, data: EntityData) {
@@ -24,9 +27,9 @@ export class GraphicEntityManager {
     }
   }
 
-  public build(): Float32Array {
+  public build(): [Float32Array, WebGLBuffer] {
     if (!this.pendingChange) {
-      return this.transformBuffer!;
+      return [this.transformBuffer!, this.atlasData.modelBufferReference!];
     }
 
     if (this.transformBuffer == undefined || this.transformBuffer.length != this.entities.size * GraphicEntityManager.ITEMS_PER_TRANSFORM_BUFFER) {
@@ -42,7 +45,7 @@ export class GraphicEntityManager {
     });
 
     this.pendingChange = false;
-    return this.transformBuffer!;
+    return [this.transformBuffer!, this.atlasData.modelBufferReference!];
   }
 }
 
