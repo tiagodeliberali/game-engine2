@@ -24,7 +24,7 @@ module.exports = {
     new CopyPlugin({
       patterns: [
         { from: "./public/textures", to: "./textures" },
-        { from: "./src/shaders", to: "./shaders" },
+        { from: "./src/graphics/shaders", to: "./shaders" },
       ],
     }),
   ],
