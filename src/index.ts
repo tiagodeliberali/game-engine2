@@ -20,18 +20,29 @@ const run = async () => {
   key.add(new SpriteComponent(atlas.getSprite("key")!));
 
   const character = new GameObject(4 * 16, 3 * 16);
-  const characterSprite = new SpriteComponent(atlas.getSprite("character_walk_right")!);
+  const characterSprite = new SpriteComponent(atlas.getSprite("character_idle_right")!);
   character.add(characterSprite);
 
   scene.add([coin1, coin2, key, character])
   
+  var lastMove: string;
   const update = () => {
     if (isKeyPressed(Keys.ArrowLeft)) {
       character.updatePosition((x, y) => [x - 1, y]);
       characterSprite.updateSprite(atlas.getSprite("character_walk_left")!);
+      lastMove = Keys.ArrowLeft;
     } else if (isKeyPressed(Keys.ArrowRight)) {
       character.updatePosition((x, y) => [x + 1, y]);
       characterSprite.updateSprite(atlas.getSprite("character_walk_right")!);
+      lastMove = Keys.ArrowRight;
+    } else {
+      if (lastMove == Keys.ArrowLeft) {
+        characterSprite.updateSprite(atlas.getSprite("character_idle_left")!);
+        lastMove = "";
+      } else if (lastMove == Keys.ArrowRight) {
+        characterSprite.updateSprite(atlas.getSprite("character_idle_right")!);
+        lastMove = "";
+      }
     }
 
     scene.update();

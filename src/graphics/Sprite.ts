@@ -31,6 +31,7 @@ export class SpriteData {
 export class SpriteComponent extends Component {
   public static readonly Name: string = "SpriteComponent";
   private data: SpriteData;
+  private objectId: string;
   entityManager: GraphicEntityManager | undefined;
 
   constructor(data: SpriteData) {
@@ -40,9 +41,11 @@ export class SpriteComponent extends Component {
 
   public updateSprite(data: SpriteData) {
     this.data = data;
+    this.entityManager?.setSprite(this.objectId, this.data);
   }
 
   public setReferece(gameObject: GameObject): void {
+    this.objectId = gameObject.id;
     gameObject.subscribeOnChangePosition((gameObject) => this.updateEntityManagerData(gameObject));
   }
 

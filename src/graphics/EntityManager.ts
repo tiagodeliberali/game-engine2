@@ -27,6 +27,16 @@ export class GraphicEntityManager {
     }
   }
 
+  public setSprite(id: string, spriteData: SpriteData) {
+    if (this.entities.has(id)) {
+      const internalData = this.entities.get(id)!;
+      internalData.data.animation = spriteData;
+      this.pendingChange.set(id, internalData);
+    } else {
+      console.error(`Could execute GraphicEntityManager.setSprite: could not find entity with id ${id}`)
+    }
+  }
+
   public update(id: string, updateFunction: (data: EntityData) => void) {
     const internalData = this.entities.get(id);
 
