@@ -40,6 +40,10 @@ export class SpriteComponent extends Component {
     this.data = data;
   }
 
+  update(newSprite: SpriteComponent) {
+    this.entityData!.animation = newSprite.data!;
+  }
+
   public setReferece(gameObject: GameObject): void {
     this.entityData = new EntityData(gameObject.x, gameObject.y, this.data);
     gameObject.subscribeOnChangePosition((gameObject) => this.updateDataOnManager(gameObject));

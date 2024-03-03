@@ -7,8 +7,7 @@ build vertical atlas with:
     magick montage -mode concatenate -tile 1x  mario_tiles_*.png -background none mario.png
 */
 
-import { Component } from "../core/Component";
-import { SpriteEntity } from "./Sprite";
+import { SpriteComponent, SpriteEntity } from "./Sprite";
 
 const zUnity = 0.00001;
 
@@ -126,7 +125,7 @@ export class AtlasVertexBuffer {
         this.transformBufferVertexLength = this.transformBuffer.length / Atlas.ITEMS_PER_TRANSFORM_BUFFER;
     }
 
-    public getSprite(name: string): Component {
+    public getSprite(name: string): SpriteComponent {
         return this.sprites.get(name);
     }
 }

@@ -1,5 +1,7 @@
+import { GameObject } from "../core/GameObject";
 import { Atlas, AtlasVertexBuffer } from "./Atlas";
 import { EntityData, GraphicEntityManager, buildEntityDataRow } from "./EntityManager";
+import { SpriteComponent } from "./Sprite";
 
 const loadShader = async (
     gl: WebGL2RenderingContext,
@@ -155,9 +157,11 @@ export class GraphicProcessor {
         const atlasVAO = loadAtlas(this.gl, atlasData);
         this.atlasVAO = atlasVAO;
         this.atlasData = atlasData;
+
+        this.loadEntities(new GraphicEntityManager(atlasData));
     }
 
-    public loadEntities(entityManager: GraphicEntityManager) {
+    private loadEntities(entityManager: GraphicEntityManager) {
         const [entityTransformBufferData, atlasModelBuffer] = entityManager.build();
         const [entitiesVAO, entityTransformBuffer] = loadEntities(this.gl, atlasModelBuffer, entityTransformBufferData);
         this.entitiesVAO = entitiesVAO;
@@ -165,6 +169,10 @@ export class GraphicProcessor {
         this.entityManager = entityManager;
     }
 
+    public configureSpriteComponent(spriteComponent: SpriteComponent, gameObject: GameObject) {
+        spriteComponent.setManager(this.entityManager!);
+        spriteComponent.updateDataOnManager(gameObject);
+    }
 
     public draw() {
         this.gl.uniform1f(this.uTick, this.uTickValue++);

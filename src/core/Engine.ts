@@ -1,6 +1,5 @@
 import { initKeyboard } from "../Keyboard";
 import { AtlasVertexBuffer } from "../graphics/Atlas";
-import { GraphicEntityManager } from "../graphics/EntityManager";
 import { GraphicProcessor } from "../graphics/GraphicProcessor";
 import { SpriteComponent } from "../graphics/Sprite";
 import { GameObject } from "./GameObject";
@@ -8,7 +7,6 @@ import { GameObject } from "./GameObject";
 export class Engine {
     private graphicProcessor: GraphicProcessor;
     private gameObjects: GameObject[] = [];
-    private entityManager: GraphicEntityManager | undefined;
 
     private constructor(graphicProcessor: GraphicProcessor) {
         this.graphicProcessor = graphicProcessor;
@@ -21,24 +19,20 @@ export class Engine {
     }
 
     public loadAtlas(atlasData: AtlasVertexBuffer) {
-        this.entityManager = new GraphicEntityManager(atlasData);
         this.graphicProcessor.loadAtlas(atlasData);
-        this.graphicProcessor.loadEntities(this.entityManager);
     }
 
     public add(gameObjects: GameObject[]) {
         for (const gameObject of gameObjects) {
             this.processComponents(gameObject);
+            this.gameObjects.push(gameObject);
         }
-        this.gameObjects = this.gameObjects.concat(gameObjects);
     }
 
     private processComponents(gameObject: GameObject) {
         for (const component of gameObject.components) {
             if (component.is(SpriteComponent.Name)) {
-                const spriteComponent = component as SpriteComponent;
-                spriteComponent.setManager(this.entityManager!);
-                this.entityManager!.set(gameObject.id, spriteComponent.entityData!);
+                this.graphicProcessor.configureSpriteComponent(component as SpriteComponent, gameObject);                
             }
         }
     }

@@ -11,7 +11,7 @@ export class EventHandler<T> {
         this.events = this.events.filter(h => h !== action);
     }
 
-    public on(entity: T) {
+    public fire(entity: T) {
         this.events.forEach((action) => action(entity));
     }
 }

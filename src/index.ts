@@ -22,15 +22,17 @@ const run = async () => {
   const characterSprite = atlas.getSprite("character_walk_right");
   character.add(characterSprite);
 
-  // todo: test change characterSprite with keyboard event and update buffer based on offset
+  // todo: test change characterSprite with keyboard event
 
   scene.add([coin1, coin2, key, character])
   
   const update = () => {
     if (isKeyPressed(Keys.ArrowLeft)) {
-      character.updatePosition((x, y) => [x - 1, y])
+      character.updatePosition((x, y) => [x - 1, y]);
+      characterSprite.update(atlas.getSprite("character_walk_left"));
     } else if (isKeyPressed(Keys.ArrowRight)) {
-      character.updatePosition((x, y) => [x + 1, y])
+      character.updatePosition((x, y) => [x + 1, y]);
+      characterSprite.update(atlas.getSprite("character_walk_right"));
     }
 
     scene.update();
