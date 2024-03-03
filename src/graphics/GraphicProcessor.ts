@@ -51,20 +51,33 @@ const aOffset = 2;
 const aDepth = 3;
 const aAnimation = 4;
 
-const loadAtlas = (gl: WebGL2RenderingContext, atlasData: Atlas): WebGLVertexArrayObject => {
+var modelBufferReference: WebGLVertexArrayObject | undefined;
+const bindModelBuffer = (gl: WebGL2RenderingContext) => {
+    if (modelBufferReference == undefined) {
+        modelBufferReference =  gl.createBuffer()!;
+    }
+
+    gl.bindBuffer(gl.ARRAY_BUFFER, modelBufferReference);
+    gl.vertexAttribPointer(aPositionLoc, 2, gl.FLOAT, false, AtlasBuilder.ITEMS_PER_MODEL_BUFFER * Float32Array.BYTES_PER_ELEMENT, 0);
+    gl.vertexAttribPointer(aTextCoordLoc, 2, gl.FLOAT, false, AtlasBuilder.ITEMS_PER_MODEL_BUFFER * Float32Array.BYTES_PER_ELEMENT, 2 * Float32Array.BYTES_PER_ELEMENT);
+    gl.enableVertexAttribArray(aPositionLoc);
+    gl.enableVertexAttribArray(aTextCoordLoc);
+}
+
+const loadAtlas = (gl: WebGL2RenderingContext, atlas: Atlas): WebGLVertexArrayObject => {
     const atlasTexture = gl.createTexture();
     gl.bindTexture(gl.TEXTURE_2D_ARRAY, atlasTexture);
     gl.texImage3D(
         gl.TEXTURE_2D_ARRAY,
         0,
         gl.RGBA,
-        atlasData.image.width, // width of the image
-        atlasData.image.width, // height of the image: since we are using a vertical atlas with squared tiles, we will consider that each tile height == tile width
-        atlasData.image.height / atlasData.image.width, // the number of tiles is height / width
+        atlas.image.width, // width of the image
+        atlas.image.width, // height of the image: since we are using a vertical atlas with squared tiles, we will consider that each tile height == tile width
+        atlas.image.height / atlas.image.width, // the number of tiles is height / width
         0,
         gl.RGBA,
         gl.UNSIGNED_BYTE,
-        atlasData.image);
+        atlas.image);
 
     gl.generateMipmap(gl.TEXTURE_2D_ARRAY);
     gl.texParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
@@ -73,18 +86,13 @@ const loadAtlas = (gl: WebGL2RenderingContext, atlasData: Atlas): WebGLVertexArr
     const atlasVAO = gl.createVertexArray();
     gl.bindVertexArray(atlasVAO);
 
-    const modelBuffer = gl.createBuffer();
-    atlasData.modelBufferReference = modelBuffer!;
-    gl.bindBuffer(gl.ARRAY_BUFFER, modelBuffer);
-    gl.bufferData(gl.ARRAY_BUFFER, atlasData.modelBuffer, gl.STATIC_DRAW);
-    gl.vertexAttribPointer(aPositionLoc, 2, gl.FLOAT, false, AtlasBuilder.ITEMS_PER_MODEL_BUFFER * Float32Array.BYTES_PER_ELEMENT, 0);
-    gl.vertexAttribPointer(aTextCoordLoc, 2, gl.FLOAT, false, AtlasBuilder.ITEMS_PER_MODEL_BUFFER * Float32Array.BYTES_PER_ELEMENT, 2 * Float32Array.BYTES_PER_ELEMENT);
-    gl.enableVertexAttribArray(aPositionLoc);
-    gl.enableVertexAttribArray(aTextCoordLoc);
+    // loading data to model buffer
+    bindModelBuffer(gl);
+    gl.bufferData(gl.ARRAY_BUFFER, atlas.modelBuffer, gl.STATIC_DRAW);
 
     const transformBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, transformBuffer);
-    gl.bufferData(gl.ARRAY_BUFFER, atlasData.transformBuffer, gl.STATIC_DRAW);
+    gl.bufferData(gl.ARRAY_BUFFER, atlas.transformBuffer, gl.STATIC_DRAW);
     gl.vertexAttribPointer(aOffset, 3, gl.FLOAT, false, AtlasBuilder.ITEMS_PER_TRANSFORM_BUFFER * Float32Array.BYTES_PER_ELEMENT, 0);
     gl.vertexAttribPointer(aDepth, 1, gl.FLOAT, false, AtlasBuilder.ITEMS_PER_TRANSFORM_BUFFER * Float32Array.BYTES_PER_ELEMENT, 3 * Float32Array.BYTES_PER_ELEMENT);
     gl.enableVertexAttribArray(aOffset);
@@ -98,16 +106,13 @@ const loadAtlas = (gl: WebGL2RenderingContext, atlasData: Atlas): WebGLVertexArr
     return atlasVAO!;
 }
 
-const loadEntities = (gl: WebGL2RenderingContext, modelBuffer: WebGLVertexArrayObject, entityTransformBufferData: Float32Array): [WebGLVertexArrayObject, WebGLBuffer] => {
+const loadEntities = (gl: WebGL2RenderingContext, entityTransformBufferData: Float32Array): [WebGLVertexArrayObject, WebGLBuffer] => {
     const entitiesVAO = gl.createVertexArray();
     gl.bindVertexArray(entitiesVAO);
 
-    gl.bindBuffer(gl.ARRAY_BUFFER, modelBuffer);
-    gl.vertexAttribPointer(aPositionLoc, 2, gl.FLOAT, false, AtlasBuilder.ITEMS_PER_MODEL_BUFFER * Float32Array.BYTES_PER_ELEMENT, 0);
-    gl.vertexAttribPointer(aTextCoordLoc, 2, gl.FLOAT, false, AtlasBuilder.ITEMS_PER_MODEL_BUFFER * Float32Array.BYTES_PER_ELEMENT, 2 * Float32Array.BYTES_PER_ELEMENT);
-    gl.enableVertexAttribArray(aPositionLoc);
-    gl.enableVertexAttribArray(aTextCoordLoc);
-
+    // assumes that data was loaded on loadAtlas call
+    bindModelBuffer(gl);
+    
     const entityTransformBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, entityTransformBuffer);
     gl.bufferData(gl.ARRAY_BUFFER, entityTransformBufferData, gl.STATIC_DRAW);
@@ -135,7 +140,7 @@ export class GraphicProcessor {
     private uTickValue: number = 0;
 
     private atlasVAO: WebGLVertexArrayObject | undefined;
-    private atlasData: Atlas | undefined;
+    private atlas: Atlas | undefined;
 
     private entitiesVAO: WebGLVertexArrayObject | undefined;
     private entityTransformBuffer: WebGLBuffer | undefined;
@@ -153,17 +158,16 @@ export class GraphicProcessor {
         return new GraphicProcessor(gl, program);
     }
 
-    public loadAtlas(atlasData: Atlas) {
-        const atlasVAO = loadAtlas(this.gl, atlasData);
-        this.atlasVAO = atlasVAO;
-        this.atlasData = atlasData;
+    public loadAtlas(atlas: Atlas) {
+        this.atlasVAO = loadAtlas(this.gl, atlas);
+        this.atlas = atlas;
 
-        this.loadEntities(new GraphicEntityManager(atlasData));
+        this.loadEntities(new GraphicEntityManager());
     }
 
     private loadEntities(entityManager: GraphicEntityManager) {
-        const [entityTransformBufferData, atlasModelBuffer] = entityManager.build();
-        const [entitiesVAO, entityTransformBuffer] = loadEntities(this.gl, atlasModelBuffer, entityTransformBufferData);
+        const entityTransformBufferData = entityManager.build();
+        const [entitiesVAO, entityTransformBuffer] = loadEntities(this.gl, entityTransformBufferData);
         this.entitiesVAO = entitiesVAO;
         this.entityTransformBuffer = entityTransformBuffer;
         this.entityManager = entityManager;
@@ -171,7 +175,7 @@ export class GraphicProcessor {
 
     public configureSpriteComponent(spriteComponent: SpriteComponent, gameObject: GameObject) {
         spriteComponent.setManager(this.entityManager!);
-        spriteComponent.updateDataOnManager(gameObject);
+        spriteComponent.updateEntityManagerData(gameObject);
     }
 
     public draw() {
@@ -179,7 +183,7 @@ export class GraphicProcessor {
 
         if (this.atlasVAO != undefined) {
             this.gl.bindVertexArray(this.atlasVAO);
-            this.gl.drawArraysInstanced(this.gl.TRIANGLES, 0, this.atlasData!.modelBufferVertexLength, this.atlasData!.transformBufferVertexLength);
+            this.gl.drawArraysInstanced(this.gl.TRIANGLES, 0, this.atlas!.modelBufferVertexLength, this.atlas!.transformBufferVertexLength);
         }
 
         if (this.entitiesVAO != undefined) {
@@ -203,13 +207,13 @@ export class GraphicProcessor {
             }
 
             this.gl.bindVertexArray(this.entitiesVAO);
-            this.gl.drawArraysInstanced(this.gl.TRIANGLES, 0, this.atlasData!.modelBufferVertexLength, this.entityManager!.size());
+            this.gl.drawArraysInstanced(this.gl.TRIANGLES, 0, this.atlas!.modelBufferVertexLength, this.entityManager!.numberOfEntities());
         }
 
         this.gl.bindVertexArray(null);
 
         if (this.uTickValue > 10000) {
-            this.uTickValue = 0;
+            this.uTickValue = 1;
         }
     }
 }

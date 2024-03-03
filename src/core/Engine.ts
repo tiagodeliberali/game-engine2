@@ -25,14 +25,15 @@ export class Engine {
     public add(gameObjects: GameObject[]) {
         for (const gameObject of gameObjects) {
             this.processComponents(gameObject);
-            this.gameObjects.push(gameObject);
         }
     }
 
     private processComponents(gameObject: GameObject) {
         for (const component of gameObject.components) {
-            if (component.is(SpriteComponent.Name)) {
+            if (component.getType() == SpriteComponent.Name) {
                 this.graphicProcessor.configureSpriteComponent(component as SpriteComponent, gameObject);                
+            } else {
+                this.gameObjects.push(gameObject);
             }
         }
     }

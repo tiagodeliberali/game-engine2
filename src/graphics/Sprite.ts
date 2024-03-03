@@ -2,7 +2,7 @@ import { Component } from "../core/Component";
 import { GameObject } from "../core/GameObject";
 import { EntityData, GraphicEntityManager } from "./EntityManager";
 
-export class SpriteEntity {
+export class SpriteManager {
   sprites: Map<string, SpriteData>;
 
   private constructor(data: [SpriteData]) {
@@ -10,10 +10,10 @@ export class SpriteEntity {
     data.forEach((item) => this.sprites.set(item.name, item));
   }
 
-  public static async load<AnimationEntity>(name: string) {
+  public static async load(name: string) {
     const file = await fetch(`./textures/${name}_sprites.json`);
     const data = await file.json();
-    return new SpriteEntity(data);
+    return new SpriteManager(data);
   }
 
   public get(name: string): SpriteData | undefined {
@@ -43,18 +43,18 @@ export class SpriteComponent extends Component {
   }
 
   public setReferece(gameObject: GameObject): void {
-    gameObject.subscribeOnChangePosition((gameObject) => this.updateDataOnManager(gameObject));
+    gameObject.subscribeOnChangePosition((gameObject) => this.updateEntityManagerData(gameObject));
   }
 
   public setManager(entityManager: GraphicEntityManager) {
     this.entityManager = entityManager;
   }
 
-  public updateDataOnManager(gameObject: GameObject) {
+  public updateEntityManagerData(gameObject: GameObject) {
     this.entityManager?.set(gameObject.id, new EntityData(gameObject.x, gameObject.y, this.data));
   }
 
-  public is(name: string): boolean {
-    return name == SpriteComponent.Name;
+  public getType(): string {
+    return SpriteComponent.Name;
   }
 }

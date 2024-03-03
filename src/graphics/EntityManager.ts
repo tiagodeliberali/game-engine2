@@ -1,5 +1,4 @@
 import { SpriteData } from "./Sprite";
-import { Atlas } from "./Atlas";
 
 export const buildEntityDataRow = (data: EntityData) => [
   data.x, data.y, 0.001, data.animation.start, data.animation.ticksPerFrame ?? 1, data.animation.duration ?? 0
@@ -9,14 +8,12 @@ export class GraphicEntityManager {
   public static ITEMS_PER_TRANSFORM_BUFFER: number = 6;
 
   private entities: Map<string, InternalEntityData>;
-  private atlasData: Atlas;
   private pendingChange: Map<string, InternalEntityData>;
   private lastSize: number = 0;
 
-  constructor(atlasData: Atlas) {
+  constructor() {
     this.entities = new Map<string, InternalEntityData>();
     this.pendingChange = new Map<string, InternalEntityData>();
-    this.atlasData = atlasData;
   }
 
   public set(id: string, data: EntityData) {
@@ -36,10 +33,12 @@ export class GraphicEntityManager {
     if (internalData != undefined) {
       updateFunction(internalData.data);
       this.pendingChange.set(id, internalData);
+    } else {
+      console.error(`Could execute GraphicEntityManager.update: could not find entity with id ${id}`)
     }
   }
 
-  public build(): [Float32Array, WebGLBuffer] {
+  public build(): Float32Array {
     const transformBuffer = new Float32Array(this.entities.size * GraphicEntityManager.ITEMS_PER_TRANSFORM_BUFFER);
 
     var offset = 0;
@@ -52,14 +51,12 @@ export class GraphicEntityManager {
     this.pendingChange.clear();
     this.lastSize = this.entities.size;
 
-    return [transformBuffer!, this.atlasData.modelBufferReference!];
+    return transformBuffer;
   }
-
-
 
   public diff(): GraphicEntityDiff {
     if (this.lastSize != this.entities.size) {
-      const [transformBuffer, _] = this.build();
+      const transformBuffer = this.build();
       return GraphicEntityDiff.Full(transformBuffer);
     }
 
@@ -72,7 +69,7 @@ export class GraphicEntityManager {
     return diff;
   }
 
-  public size() {
+  public numberOfEntities() {
     return this.entities.size;
   }
 }

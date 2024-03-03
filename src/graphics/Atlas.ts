@@ -7,7 +7,7 @@ build vertical atlas with:
     magick montage -mode concatenate -tile 1x  mario_tiles_*.png -background none mario.png
 */
 
-import { SpriteData, SpriteEntity } from "./Sprite";
+import { SpriteData, SpriteManager } from "./Sprite";
 
 const zUnity = 0.00001;
 
@@ -59,9 +59,9 @@ export class AtlasBuilder {
 
     image: HTMLImageElement;
     data: TileMap;
-    sprites: SpriteEntity;
+    sprites: SpriteManager;
 
-    constructor(image: HTMLImageElement, data: TileMap, sprites: SpriteEntity) {
+    constructor(image: HTMLImageElement, data: TileMap, sprites: SpriteManager) {
         this.image = image;
         this.data = data;
         this.sprites = sprites;
@@ -70,7 +70,7 @@ export class AtlasBuilder {
     public static async load(name: string) {
         const data = await loadTileMap(name);
         const image = await loadImage(name);
-        const sprites = await SpriteEntity.load(name);
+        const sprites = await SpriteManager.load(name);
 
         const atlas = new AtlasBuilder(image, data, sprites);
         return atlas.build();
@@ -112,16 +112,15 @@ export class AtlasBuilder {
 }
 
 export class Atlas {
-    private sprites: SpriteEntity;
+    private sprites: SpriteManager;
 
     modelBuffer: Float32Array;
     transformBuffer: Float32Array;
     image: HTMLImageElement;
     modelBufferVertexLength: number;
     transformBufferVertexLength: number;
-    modelBufferReference: WebGLBuffer | undefined;
 
-    constructor(modelBuffer: Float32Array, transformBuffer: Float32Array, image: HTMLImageElement, sprites: SpriteEntity) {
+    constructor(modelBuffer: Float32Array, transformBuffer: Float32Array, image: HTMLImageElement, sprites: SpriteManager) {
         this.modelBuffer = modelBuffer;
         this.transformBuffer = transformBuffer;
         this.image = image;
