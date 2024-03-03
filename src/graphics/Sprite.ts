@@ -15,10 +15,9 @@ export class SpriteEntity {
     const data = await file.json();
     return new SpriteEntity(data);
   }
-  public get(name: string): SpriteComponent {
-    const data = this.sprites.get(name)!;
 
-    return new SpriteComponent(data);
+  public get(name: string): SpriteData | undefined {
+    return this.sprites.get(name);
   }
 }
 
@@ -32,7 +31,6 @@ export class SpriteData {
 export class SpriteComponent extends Component {
   public static readonly Name: string = "SpriteComponent";
   private data: SpriteData;
-  entityData: EntityData | undefined;
   entityManager: GraphicEntityManager | undefined;
 
   constructor(data: SpriteData) {
@@ -40,12 +38,11 @@ export class SpriteComponent extends Component {
     this.data = data;
   }
 
-  update(newSprite: SpriteComponent) {
-    this.entityData!.animation = newSprite.data!;
+  public updateSprite(data: SpriteData) {
+    this.data = data;
   }
 
   public setReferece(gameObject: GameObject): void {
-    this.entityData = new EntityData(gameObject.x, gameObject.y, this.data);
     gameObject.subscribeOnChangePosition((gameObject) => this.updateDataOnManager(gameObject));
   }
 
@@ -53,10 +50,8 @@ export class SpriteComponent extends Component {
     this.entityManager = entityManager;
   }
 
-  updateDataOnManager(gameObject: GameObject) {
-    this.entityData!.x = gameObject.x;
-    this.entityData!.y = gameObject.y;
-    this.entityManager?.set(gameObject.id, this.entityData!);
+  public updateDataOnManager(gameObject: GameObject) {
+    this.entityManager?.set(gameObject.id, new EntityData(gameObject.x, gameObject.y, this.data));
   }
 
   public is(name: string): boolean {

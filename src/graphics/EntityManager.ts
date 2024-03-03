@@ -1,5 +1,5 @@
 import { SpriteData } from "./Sprite";
-import { AtlasVertexBuffer } from "./Atlas";
+import { Atlas } from "./Atlas";
 
 export const buildEntityDataRow = (data: EntityData) => [
   data.x, data.y, 0.001, data.animation.start, data.animation.ticksPerFrame ?? 1, data.animation.duration ?? 0
@@ -9,11 +9,11 @@ export class GraphicEntityManager {
   public static ITEMS_PER_TRANSFORM_BUFFER: number = 6;
 
   private entities: Map<string, InternalEntityData>;
-  private atlasData: AtlasVertexBuffer;
+  private atlasData: Atlas;
   private pendingChange: Map<string, InternalEntityData>;
   private lastSize: number = 0;
 
-  constructor(atlasData: AtlasVertexBuffer) {
+  constructor(atlasData: Atlas) {
     this.entities = new Map<string, InternalEntityData>();
     this.pendingChange = new Map<string, InternalEntityData>();
     this.atlasData = atlasData;

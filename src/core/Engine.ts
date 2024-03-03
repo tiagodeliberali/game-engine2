@@ -1,5 +1,5 @@
 import { initKeyboard } from "../Keyboard";
-import { AtlasVertexBuffer } from "../graphics/Atlas";
+import { Atlas } from "../graphics/Atlas";
 import { GraphicProcessor } from "../graphics/GraphicProcessor";
 import { SpriteComponent } from "../graphics/Sprite";
 import { GameObject } from "./GameObject";
@@ -18,7 +18,7 @@ export class Engine {
         return new Engine(graphicProcessor);
     }
 
-    public loadAtlas(atlasData: AtlasVertexBuffer) {
+    public loadAtlas(atlasData: Atlas) {
         this.graphicProcessor.loadAtlas(atlasData);
     }
 

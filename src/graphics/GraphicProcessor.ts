@@ -1,5 +1,5 @@
 import { GameObject } from "../core/GameObject";
-import { Atlas, AtlasVertexBuffer } from "./Atlas";
+import { AtlasBuilder, Atlas } from "./Atlas";
 import { EntityData, GraphicEntityManager, buildEntityDataRow } from "./EntityManager";
 import { SpriteComponent } from "./Sprite";
 
@@ -51,7 +51,7 @@ const aOffset = 2;
 const aDepth = 3;
 const aAnimation = 4;
 
-const loadAtlas = (gl: WebGL2RenderingContext, atlasData: AtlasVertexBuffer): WebGLVertexArrayObject => {
+const loadAtlas = (gl: WebGL2RenderingContext, atlasData: Atlas): WebGLVertexArrayObject => {
     const atlasTexture = gl.createTexture();
     gl.bindTexture(gl.TEXTURE_2D_ARRAY, atlasTexture);
     gl.texImage3D(
@@ -77,16 +77,16 @@ const loadAtlas = (gl: WebGL2RenderingContext, atlasData: AtlasVertexBuffer): We
     atlasData.modelBufferReference = modelBuffer!;
     gl.bindBuffer(gl.ARRAY_BUFFER, modelBuffer);
     gl.bufferData(gl.ARRAY_BUFFER, atlasData.modelBuffer, gl.STATIC_DRAW);
-    gl.vertexAttribPointer(aPositionLoc, 2, gl.FLOAT, false, Atlas.ITEMS_PER_MODEL_BUFFER * Float32Array.BYTES_PER_ELEMENT, 0);
-    gl.vertexAttribPointer(aTextCoordLoc, 2, gl.FLOAT, false, Atlas.ITEMS_PER_MODEL_BUFFER * Float32Array.BYTES_PER_ELEMENT, 2 * Float32Array.BYTES_PER_ELEMENT);
+    gl.vertexAttribPointer(aPositionLoc, 2, gl.FLOAT, false, AtlasBuilder.ITEMS_PER_MODEL_BUFFER * Float32Array.BYTES_PER_ELEMENT, 0);
+    gl.vertexAttribPointer(aTextCoordLoc, 2, gl.FLOAT, false, AtlasBuilder.ITEMS_PER_MODEL_BUFFER * Float32Array.BYTES_PER_ELEMENT, 2 * Float32Array.BYTES_PER_ELEMENT);
     gl.enableVertexAttribArray(aPositionLoc);
     gl.enableVertexAttribArray(aTextCoordLoc);
 
     const transformBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, transformBuffer);
     gl.bufferData(gl.ARRAY_BUFFER, atlasData.transformBuffer, gl.STATIC_DRAW);
-    gl.vertexAttribPointer(aOffset, 3, gl.FLOAT, false, Atlas.ITEMS_PER_TRANSFORM_BUFFER * Float32Array.BYTES_PER_ELEMENT, 0);
-    gl.vertexAttribPointer(aDepth, 1, gl.FLOAT, false, Atlas.ITEMS_PER_TRANSFORM_BUFFER * Float32Array.BYTES_PER_ELEMENT, 3 * Float32Array.BYTES_PER_ELEMENT);
+    gl.vertexAttribPointer(aOffset, 3, gl.FLOAT, false, AtlasBuilder.ITEMS_PER_TRANSFORM_BUFFER * Float32Array.BYTES_PER_ELEMENT, 0);
+    gl.vertexAttribPointer(aDepth, 1, gl.FLOAT, false, AtlasBuilder.ITEMS_PER_TRANSFORM_BUFFER * Float32Array.BYTES_PER_ELEMENT, 3 * Float32Array.BYTES_PER_ELEMENT);
     gl.enableVertexAttribArray(aOffset);
     gl.enableVertexAttribArray(aDepth);
 
@@ -103,8 +103,8 @@ const loadEntities = (gl: WebGL2RenderingContext, modelBuffer: WebGLVertexArrayO
     gl.bindVertexArray(entitiesVAO);
 
     gl.bindBuffer(gl.ARRAY_BUFFER, modelBuffer);
-    gl.vertexAttribPointer(aPositionLoc, 2, gl.FLOAT, false, Atlas.ITEMS_PER_MODEL_BUFFER * Float32Array.BYTES_PER_ELEMENT, 0);
-    gl.vertexAttribPointer(aTextCoordLoc, 2, gl.FLOAT, false, Atlas.ITEMS_PER_MODEL_BUFFER * Float32Array.BYTES_PER_ELEMENT, 2 * Float32Array.BYTES_PER_ELEMENT);
+    gl.vertexAttribPointer(aPositionLoc, 2, gl.FLOAT, false, AtlasBuilder.ITEMS_PER_MODEL_BUFFER * Float32Array.BYTES_PER_ELEMENT, 0);
+    gl.vertexAttribPointer(aTextCoordLoc, 2, gl.FLOAT, false, AtlasBuilder.ITEMS_PER_MODEL_BUFFER * Float32Array.BYTES_PER_ELEMENT, 2 * Float32Array.BYTES_PER_ELEMENT);
     gl.enableVertexAttribArray(aPositionLoc);
     gl.enableVertexAttribArray(aTextCoordLoc);
 
@@ -135,7 +135,7 @@ export class GraphicProcessor {
     private uTickValue: number = 0;
 
     private atlasVAO: WebGLVertexArrayObject | undefined;
-    private atlasData: AtlasVertexBuffer | undefined;
+    private atlasData: Atlas | undefined;
 
     private entitiesVAO: WebGLVertexArrayObject | undefined;
     private entityTransformBuffer: WebGLBuffer | undefined;
@@ -153,7 +153,7 @@ export class GraphicProcessor {
         return new GraphicProcessor(gl, program);
     }
 
-    public loadAtlas(atlasData: AtlasVertexBuffer) {
+    public loadAtlas(atlasData: Atlas) {
         const atlasVAO = loadAtlas(this.gl, atlasData);
         this.atlasVAO = atlasVAO;
         this.atlasData = atlasData;
