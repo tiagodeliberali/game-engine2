@@ -1,7 +1,8 @@
+import { Vec2 } from "../core/Math";
 import { SpriteData } from "./Sprite";
 
 export const buildEntityDataRow = (data: EntityData) => [
-  data.x, data.y, 0.001, data.animation.start, data.animation.ticksPerFrame ?? 1, data.animation.duration ?? 0
+  data.position.x, data.position.y, 0.001, data.animation.start, data.animation.ticksPerFrame ?? 1, data.animation.duration ?? 0
 ];
 
 export class GraphicEntityManager {
@@ -117,13 +118,11 @@ class InternalEntityData {
 }
 
 export class EntityData {
-  x: number;
-  y: number;
+  position: Vec2;
   animation: SpriteData;
 
-  constructor(x: number, y: number, animation: SpriteData) {
-    this.x = x;
-    this.y = y;
+  constructor(position: Vec2, animation: SpriteData) {
+    this.position = position;
     this.animation = animation;
   }
 }

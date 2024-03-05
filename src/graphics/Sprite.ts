@@ -31,7 +31,7 @@ export class SpriteData {
 export class SpriteComponent extends Component {
   public static readonly Name: string = "SpriteComponent";
   private data: SpriteData;
-  private objectId: string;
+  private objectId: string| undefined;
   entityManager: GraphicEntityManager | undefined;
 
   constructor(data: SpriteData) {
@@ -41,7 +41,7 @@ export class SpriteComponent extends Component {
 
   public updateSprite(data: SpriteData) {
     this.data = data;
-    this.entityManager?.setSprite(this.objectId, this.data);
+    this.objectId && this.entityManager?.setSprite(this.objectId, this.data);
   }
 
   public setReferece(gameObject: GameObject): void {
@@ -54,7 +54,7 @@ export class SpriteComponent extends Component {
   }
 
   public updateEntityManagerData(gameObject: GameObject) {
-    this.entityManager?.set(gameObject.id, new EntityData(gameObject.x, gameObject.y, this.data));
+    this.entityManager?.set(gameObject.id, new EntityData(gameObject.position, this.data));
   }
 
   public getType(): string {

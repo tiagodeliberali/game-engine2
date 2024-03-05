@@ -1,5 +1,6 @@
 import { Component } from "./Component";
 import { EventHandler, OnEvent } from "./EventHandler";
+import { Vec2 } from "./Math";
 
 var id = 1;
 
@@ -7,24 +8,22 @@ export class GameObject {
     private onChangePosition: EventHandler<GameObject> = new EventHandler<GameObject>();
     readonly id: string
     components: Array<Component>
-    x: number;
-    y: number;
+    position: Vec2;
 
-    constructor(x: number, y: number) {
-        this.x = x;
-        this.y = y;
+    constructor(position: Vec2) {
+        this.position = position;
+
         this.components = [];
         this.id = (id++).toString();
     }
 
-    public setPosition(x: number, y: number) {
-        this.x = x;
-        this.y = y;
+    public setPosition(position: Vec2) {
+        this.position = position;
         this.onChangePosition.fire(this);
     }
 
-    public updatePosition(updateAction: (x: number, y: number) => [number, number]) {
-        [this.x, this.y] = updateAction(this.x, this.y);
+    public updatePosition(updateAction: (position: Vec2) => void) {
+        updateAction(this.position);
         this.onChangePosition.fire(this);
     }
 
