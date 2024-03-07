@@ -1,48 +1,30 @@
 import { GameObject } from "../core/GameObject";
+import { Vec2 } from "../core/Math";
 import { AtlasBuilder, Atlas } from "./Atlas";
-import { EntityData, GraphicEntityManager, buildEntityDataRow } from "./EntityManager";
-import { SpriteComponent } from "./Sprite";
+import { buildProgram } from "./GraphicCore";
+import { GraphicEntityManager, IEntityType } from "./EntityManager";
+import { SpriteComponent, SpriteData } from "./Sprite";
 
-const loadShader = async (
-    gl: WebGL2RenderingContext,
-    program: WebGLProgram,
-    type: number,
-    name: string,
-): Promise<WebGLShader> => {
-    const file = await fetch(`./shaders/${name}.glsl`);
-    const source = await file.text();
+export class EntityData implements IEntityType {
+    static ENTITY_ROW_SIZE: number = 6;
+    entityRowSize: number;
 
-    const shader = gl.createShader(type)!;
-    gl.shaderSource(shader, source);
-    gl.compileShader(shader);
-    gl.attachShader(program, shader);
+    position: Vec2;
+    animation: SpriteData;
 
-    return shader;
-};
+    constructor(position: Vec2, animation: SpriteData) {
+        this.position = position;
+        this.animation = animation;
 
-const buildProgram = async (canvasName: string): Promise<[WebGL2RenderingContext, WebGLProgram]> => {
-    const canvas = document.querySelector<HTMLCanvasElement>(canvasName)!;
-    const gl = canvas.getContext("webgl2")!;
-    const program = gl.createProgram()!;
-
-    const vertexShader = await loadShader(gl, program, gl.VERTEX_SHADER, "vertex");
-    const fragmentShader = await loadShader(gl, program, gl.FRAGMENT_SHADER, "fragment");
-
-    gl.linkProgram(program);
-
-    if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
-        console.log(gl.getShaderInfoLog(vertexShader));
-        console.log(gl.getShaderInfoLog(fragmentShader));
+        this.entityRowSize = EntityData.ENTITY_ROW_SIZE;
     }
 
-    gl.useProgram(program);
-
-    gl.enable(gl.BLEND);
-    gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
-    gl.uniform2fv(gl.getUniformLocation(program, "canvas"), [canvas.width / 2, canvas.height / 2]);
-
-    return [gl!, program!];
-};
+    buildEntityDataRow() {
+        return [
+            this.position.x, this.position.y, 0.001, this.animation.start, this.animation.ticksPerFrame ?? 1, this.animation.duration ?? 0
+        ]
+    }
+}
 
 // Shaders addresses
 const aPositionLoc = 0;
@@ -54,7 +36,7 @@ const aAnimation = 4;
 var modelBufferReference: WebGLVertexArrayObject | undefined;
 const bindModelBuffer = (gl: WebGL2RenderingContext) => {
     if (modelBufferReference == undefined) {
-        modelBufferReference =  gl.createBuffer()!;
+        modelBufferReference = gl.createBuffer()!;
     }
 
     gl.bindBuffer(gl.ARRAY_BUFFER, modelBufferReference);
@@ -110,15 +92,15 @@ const loadEntities = (gl: WebGL2RenderingContext, entityTransformBufferData: Flo
     const entitiesVAO = gl.createVertexArray();
     gl.bindVertexArray(entitiesVAO);
 
-    // assumes that data was loaded on loadAtlas call
+    // assumes that data was loaded previously
     bindModelBuffer(gl);
-    
+
     const entityTransformBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, entityTransformBuffer);
     gl.bufferData(gl.ARRAY_BUFFER, entityTransformBufferData, gl.STATIC_DRAW);
-    gl.vertexAttribPointer(aOffset, 3, gl.FLOAT, false, GraphicEntityManager.ITEMS_PER_TRANSFORM_BUFFER * Float32Array.BYTES_PER_ELEMENT, 0);
-    gl.vertexAttribPointer(aDepth, 1, gl.FLOAT, false, GraphicEntityManager.ITEMS_PER_TRANSFORM_BUFFER * Float32Array.BYTES_PER_ELEMENT, 3 * Float32Array.BYTES_PER_ELEMENT);
-    gl.vertexAttribPointer(aAnimation, 2, gl.FLOAT, false, GraphicEntityManager.ITEMS_PER_TRANSFORM_BUFFER * Float32Array.BYTES_PER_ELEMENT, 4 * Float32Array.BYTES_PER_ELEMENT);
+    gl.vertexAttribPointer(aOffset, 3, gl.FLOAT, false, EntityData.ENTITY_ROW_SIZE * Float32Array.BYTES_PER_ELEMENT, 0);
+    gl.vertexAttribPointer(aDepth, 1, gl.FLOAT, false, EntityData.ENTITY_ROW_SIZE * Float32Array.BYTES_PER_ELEMENT, 3 * Float32Array.BYTES_PER_ELEMENT);
+    gl.vertexAttribPointer(aAnimation, 2, gl.FLOAT, false, EntityData.ENTITY_ROW_SIZE * Float32Array.BYTES_PER_ELEMENT, 4 * Float32Array.BYTES_PER_ELEMENT);
     gl.enableVertexAttribArray(aOffset);
     gl.enableVertexAttribArray(aDepth);
     gl.enableVertexAttribArray(aAnimation);
@@ -144,7 +126,7 @@ export class GraphicProcessor {
 
     private entitiesVAO: WebGLVertexArrayObject | undefined;
     private entityTransformBuffer: WebGLBuffer | undefined;
-    private entityManager: GraphicEntityManager | undefined;
+    private entityManager: GraphicEntityManager<EntityData> | undefined;
 
     private constructor(gl: WebGL2RenderingContext, program: WebGLProgram) {
         this.gl = gl;
@@ -154,7 +136,7 @@ export class GraphicProcessor {
     }
 
     public static async build() {
-        const [gl, program] = await buildProgram("canvas");
+        const [gl, program] = await buildProgram("canvas", "vertex", "fragment");
         return new GraphicProcessor(gl, program);
     }
 
@@ -162,10 +144,10 @@ export class GraphicProcessor {
         this.atlasVAO = loadAtlas(this.gl, atlas);
         this.atlas = atlas;
 
-        this.loadEntities(new GraphicEntityManager());
+        this.loadEntities(new GraphicEntityManager<EntityData>());
     }
 
-    private loadEntities(entityManager: GraphicEntityManager) {
+    private loadEntities(entityManager: GraphicEntityManager<EntityData>) {
         const entityTransformBufferData = entityManager.build();
         const [entitiesVAO, entityTransformBuffer] = loadEntities(this.gl, entityTransformBufferData);
         this.entitiesVAO = entitiesVAO;
@@ -173,12 +155,13 @@ export class GraphicProcessor {
         this.entityManager = entityManager;
     }
 
-    public configureSpriteComponent(spriteComponent: SpriteComponent, gameObject: GameObject) {
-        spriteComponent.setManager(this.entityManager!);
-        spriteComponent.updateEntityManagerData(gameObject);
+    public configureSpriteComponent(component: SpriteComponent, gameObject: GameObject) {
+        component.setManager(this.entityManager!);
+        component.updateEntityManagerData(gameObject);
     }
 
     public draw() {
+        this.gl.useProgram(this.program);
         this.gl.uniform1f(this.uTick, this.uTickValue++);
 
         if (this.atlasVAO != undefined) {
@@ -201,8 +184,8 @@ export class GraphicProcessor {
                 (entityDiff.data as [number, EntityData][]).forEach(([offset, data]) => {
                     this.gl.bufferSubData(
                         this.gl.ARRAY_BUFFER,
-                        offset * Float32Array.BYTES_PER_ELEMENT * GraphicEntityManager.ITEMS_PER_TRANSFORM_BUFFER,
-                        new Float32Array(buildEntityDataRow(data)));
+                        offset * Float32Array.BYTES_PER_ELEMENT * data.entityRowSize,
+                        new Float32Array(data.buildEntityDataRow()));
                 });
             }
 

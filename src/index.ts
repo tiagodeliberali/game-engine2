@@ -4,11 +4,12 @@ import { Engine } from "./core/Engine";
 import { GameObject } from "./core/GameObject";
 import { SpriteComponent } from "./graphics/Sprite";
 import { Vec2 } from "./core/Math";
+import { RigidBox, RigidBoxComponent } from "./physics/RigidBox";
 
 const run = async () => {
   const atlas = await AtlasBuilder.load("mario");
   
-  const scene = await Engine.build();
+  const scene = await Engine.build(true);
   scene.loadAtlas(atlas);
 
   const coin1 = new GameObject(new Vec2(7 * 16, 4 * 16));
@@ -23,6 +24,7 @@ const run = async () => {
   const character = new GameObject(new Vec2(4 * 16, 3 * 16));
   const characterSprite = new SpriteComponent(atlas.getSprite("character_idle_right")!);
   character.add(characterSprite);
+  character.add(new RigidBoxComponent(new RigidBox(new Vec2(8, 14), new Vec2(4,0))))
 
   scene.add([coin1, coin2, key, character])
   

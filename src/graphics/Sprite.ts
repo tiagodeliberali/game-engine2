@@ -1,6 +1,8 @@
 import { Component } from "../core/Component";
 import { GameObject } from "../core/GameObject";
-import { EntityData, GraphicEntityManager } from "./EntityManager";
+import { Vec2 } from "../core/Math";
+import { GraphicEntityManager } from "./EntityManager";
+import { EntityData } from "./GraphicProcessor";
 
 export class SpriteManager {
   sprites: Map<string, SpriteData>;
@@ -30,18 +32,18 @@ export class SpriteData {
 
 export class SpriteComponent extends Component {
   public static readonly Name: string = "SpriteComponent";
-  private data: SpriteData;
+  private entityData: EntityData;
   private objectId: string| undefined;
-  entityManager: GraphicEntityManager | undefined;
+  entityManager: GraphicEntityManager<EntityData> | undefined;
 
   constructor(data: SpriteData) {
     super();
-    this.data = data;
+    this.entityData = new EntityData(Vec2.Zero(), data);
   }
 
   public updateSprite(data: SpriteData) {
-    this.data = data;
-    this.objectId && this.entityManager?.setSprite(this.objectId, this.data);
+    this.entityData.animation = data;
+    this.objectId && this.entityManager?.update(this.objectId, (entity) => entity.animation = this.entityData.animation);
   }
 
   public setReferece(gameObject: GameObject): void {
@@ -49,12 +51,13 @@ export class SpriteComponent extends Component {
     gameObject.subscribeOnChangePosition((gameObject) => this.updateEntityManagerData(gameObject));
   }
 
-  public setManager(entityManager: GraphicEntityManager) {
+  public setManager(entityManager: GraphicEntityManager<EntityData>) {
     this.entityManager = entityManager;
   }
 
   public updateEntityManagerData(gameObject: GameObject) {
-    this.entityManager?.set(gameObject.id, new EntityData(gameObject.position, this.data));
+    this.entityData.position.update(gameObject.position)
+    this.entityManager?.set(gameObject.id, this.entityData);
   }
 
   public getType(): string {
