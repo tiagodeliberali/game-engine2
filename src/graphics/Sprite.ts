@@ -41,26 +41,26 @@ export class SpriteComponent extends Component {
     this.entityData = new EntityData(Vec2.Zero(), data);
   }
 
-  public updateSprite(data: SpriteData) {
+  updateSprite(data: SpriteData) {
     this.entityData.animation = data;
     this.objectId && this.entityManager?.update(this.objectId, (entity) => entity.animation = this.entityData.animation);
   }
 
-  public setReferece(gameObject: GameObject): void {
+  setReferece(gameObject: GameObject): void {
     this.objectId = gameObject.id;
     gameObject.subscribeOnChangePosition((gameObject) => this.updateEntityManagerData(gameObject));
   }
 
-  public setManager(entityManager: GraphicEntityManager<EntityData>) {
+  setManager(entityManager: GraphicEntityManager<EntityData>) {
     this.entityManager = entityManager;
   }
 
-  public updateEntityManagerData(gameObject: GameObject) {
+  updateEntityManagerData(gameObject: GameObject) {
     this.entityData.position.update(gameObject.position)
     this.entityManager?.set(gameObject.id, this.entityData);
   }
 
-  public getType(): string {
+  get typeName(): string {
     return SpriteComponent.Name;
   }
 }

@@ -16,6 +16,8 @@ export class RigidBox {
 
 export class RigidBoxComponent extends Component {
     public static readonly Name: string = "RigidBoxComponent";
+    private gameObject: GameObject | undefined;
+    private velocity: Vec2 = Vec2.Zero();
     box: DebugData;
     entityManager: GraphicEntityManager<DebugData> | undefined;
 
@@ -26,11 +28,16 @@ export class RigidBoxComponent extends Component {
     }
 
     setReferece(gameObject: GameObject): void {
+        this.gameObject = gameObject;
         gameObject.subscribeOnChangePosition((gameObject) => this.updateEntityManagerData(gameObject));
     }
 
-    getType(): string {
+    get typeName(): string {
         return RigidBoxComponent.Name;
+    }
+
+    setVelocity(velocity: Vec2) {
+        this.velocity = velocity;
     }
 
     updateEntityManagerData(gameObject: GameObject) {

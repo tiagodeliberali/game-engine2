@@ -44,9 +44,9 @@ export class Engine {
 
     private processComponents(gameObject: GameObject) {
         for (const component of gameObject.components) {
-            if (component.getType() == SpriteComponent.Name) {
+            if (component.typeName == SpriteComponent.Name) {
                 this.graphicProcessor.configureSpriteComponent(component as SpriteComponent, gameObject);                
-            } else if (component.getType() == RigidBoxComponent.Name) {
+            } else if (component.typeName == RigidBoxComponent.Name) {
                 this.debugGraphicProcessor?.configureRigidBoxComponent(component as RigidBoxComponent, gameObject);                
             } else {
                 this.gameObjects.push(gameObject);
