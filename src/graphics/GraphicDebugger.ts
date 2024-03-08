@@ -6,8 +6,7 @@ import { buildProgram } from "./GraphicCore";
 
 export class DebugData implements IEntityType {
     static ENTITY_ROW_SIZE: number = 6 * 6;
-    entityRowSize: number;
-
+    
     private position: Vec2;
     private offset: Vec2;
     private size: Vec2;
@@ -16,12 +15,14 @@ export class DebugData implements IEntityType {
         this.position = Vec2.sum(position, offset);
         this.offset = offset;
         this.size = size;
-        
-        this.entityRowSize = DebugData.ENTITY_ROW_SIZE;
     }
 
     updatePosition(position: Vec2) {
         this.position = Vec2.sum(position, this.offset);
+    }
+
+    get entityRowSize() {
+        return DebugData.ENTITY_ROW_SIZE
     }
 
     buildEntityDataRow() {

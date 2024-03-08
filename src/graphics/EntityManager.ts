@@ -1,6 +1,15 @@
 export interface IEntityType {
+  /**
+   * Size of the array returned by buildEntityDataRow method
+   */
+  get entityRowSize(): number;
+
+  /**
+   * Converts the IEntityType data into data to be consumed by WebGL shaders
+   * 
+   * @returns The array of data used by the vertex shader to draw elements
+   */
   buildEntityDataRow(): number[];
-  entityRowSize: number;
 }
 
 class InternalEntityData {

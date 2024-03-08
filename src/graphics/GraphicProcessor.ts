@@ -7,16 +7,17 @@ import { SpriteComponent, SpriteData } from "./Sprite";
 
 export class EntityData implements IEntityType {
     static ENTITY_ROW_SIZE: number = 6;
-    entityRowSize: number;
-
+    
     position: Vec2;
     animation: SpriteData;
 
     constructor(position: Vec2, animation: SpriteData) {
         this.position = position;
         this.animation = animation;
+    }
 
-        this.entityRowSize = EntityData.ENTITY_ROW_SIZE;
+    get entityRowSize() {
+        return EntityData.ENTITY_ROW_SIZE;
     }
 
     buildEntityDataRow() {
