@@ -37,6 +37,8 @@ export class Engine {
 
     public loadAtlas(atlasData: Atlas) {
         this.graphicProcessor.loadAtlas(atlasData);
+        this.physicProcessor.loadAtlas(atlasData);
+        this.debugGraphicProcessor?.loadAtlas(atlasData);
     }
 
     public add(gameObjects: GameObject[]) {
@@ -61,8 +63,8 @@ export class Engine {
     }
 
     public update() {
-        this.physicProcessor.update();
         this.graphicProcessor.draw();
         this.debugGraphicProcessor?.draw();
+        this.physicProcessor.update();
     }
 }

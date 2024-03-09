@@ -7,6 +7,7 @@ build vertical atlas with:
     magick montage -mode concatenate -tile 1x  mario_tiles_*.png -background none mario.png
 */
 
+import { Vec2 } from "../core/Math";
 import { SpriteData, SpriteManager } from "./Sprite";
 
 const zUnity = 0.00001;
@@ -78,7 +79,10 @@ export class AtlasBuilder {
 
     public build(): Atlas {
         const totalTiles = this.data.layers.reduce<number>((prev, elem) => prev + elem.tiles.length, 0);
+        const totalRigidBoxes = this.data.layers.filter(x => x.collider == true).reduce<number>((prev, elem) => prev + elem.tiles.length, 0);
         const transformBuffer = new Float32Array(totalTiles * AtlasBuilder.ITEMS_PER_TRANSFORM_BUFFER);
+
+        const rigidBoxes = Array<Vec2>(totalRigidBoxes);
 
         // avoid memory allocation on each iteration
         var layer = new Layer();
@@ -93,13 +97,16 @@ export class AtlasBuilder {
             for (var tileIndex = 0; tileIndex < layer.tiles.length; tileIndex++)
             {
                 tile = layer.tiles[tileIndex];
-                
+                const x = tile.x * this.data.tileSize;
+                const y = (this.data.mapHeight - 1 - tile.y) * this.data.tileSize;
                 transformBuffer.set([
-                    tile.x * this.data.tileSize,                                // x
-                    (this.data.mapHeight - 1 - tile.y) * this.data.tileSize,    // y
+                    x,                                                          // x
+                    y,                                                          // y
                     zUnity * (this.data.layers.length - layerIndex),            // z
                     Number.parseFloat(tile.id),                                 // depth
                 ], (offset++) * AtlasBuilder.ITEMS_PER_TRANSFORM_BUFFER);
+
+                layer.collider && rigidBoxes.push(new Vec2(x, y));
             }
         }
 
@@ -107,7 +114,9 @@ export class AtlasBuilder {
             buildModelBuffer(this.data.tileSize),
             transformBuffer,
             this.image,
-            this.sprites);
+            this.sprites,
+            rigidBoxes,
+            this.data.tileSize);
     }
 }
 
@@ -119,12 +128,16 @@ export class Atlas {
     image: HTMLImageElement;
     modelBufferVertexLength: number;
     transformBufferVertexLength: number;
+    rigidBoxes: Array<Vec2>;
+    tileSize: number;
 
-    constructor(modelBuffer: Float32Array, transformBuffer: Float32Array, image: HTMLImageElement, sprites: SpriteManager) {
+    constructor(modelBuffer: Float32Array, transformBuffer: Float32Array, image: HTMLImageElement, sprites: SpriteManager,  rigidBoxes: Array<Vec2>, tileSize: number) {
         this.modelBuffer = modelBuffer;
         this.transformBuffer = transformBuffer;
         this.image = image;
         this.sprites = sprites;
+        this.rigidBoxes = rigidBoxes;
+        this.tileSize = tileSize;
 
         this.modelBufferVertexLength = this.modelBuffer.length / AtlasBuilder.ITEMS_PER_MODEL_BUFFER;
         this.transformBufferVertexLength = this.transformBuffer.length / AtlasBuilder.ITEMS_PER_TRANSFORM_BUFFER;

@@ -1,6 +1,7 @@
 import { GameObject } from "../core/GameObject";
 import { Vec2 } from "../core/Math";
 import { RigidBoxComponent } from "../physics/RigidBox";
+import { Atlas } from "./Atlas";
 import { GraphicEntityManager, IEntityType } from "./EntityManager";
 import { buildProgram } from "./GraphicCore";
 
@@ -61,35 +62,40 @@ const loadEntities = (gl: WebGL2RenderingContext, entityBufferData: Float32Array
 export class GraphicDebugger {
     private gl: WebGL2RenderingContext;
     private program: WebGLProgram;
-
+    
     private entitiesVAO: WebGLVertexArrayObject | undefined;
     private modelBuffer: WebGLBuffer | undefined;
     private entityManager: GraphicEntityManager<DebugData> | undefined;
-
+    
     private constructor(gl: WebGL2RenderingContext, program: WebGLProgram) {
         this.gl = gl;
         this.program = program;
     }
-
-    public static async build() {
+    
+    static async build() {
         const [gl, program] = await buildProgram("canvas", "debugVertex", "debugFragment");
         const graphicDebugger = new GraphicDebugger(gl, program);
         graphicDebugger.loadEntities(new GraphicEntityManager<DebugData>());
         return graphicDebugger;
     }
-
-    private loadEntities(entityManager: GraphicEntityManager<DebugData>) {
+    
+    loadEntities(entityManager: GraphicEntityManager<DebugData>) {
         const entityBufferData = entityManager.build();
         [this.entitiesVAO, this.modelBuffer] = loadEntities(this.gl, entityBufferData);
         this.entityManager = entityManager;
     }
-
-    public configureRigidBoxComponent(component: RigidBoxComponent) {
-        component.setDebuggerManager(this.entityManager!);
-        component.updateEntityManagerData();
+    
+    loadAtlas(atlasData: Atlas) {
+        var i = 0;
+        atlasData.rigidBoxes.forEach((box) => this.entityManager?.set(`rigid_box_${i++}`, new DebugData(box, Vec2.Zero(), new Vec2(atlasData.tileSize, atlasData.tileSize))))
     }
 
-    public draw() {
+    configureRigidBoxComponent(component: RigidBoxComponent) {
+        component.setDebuggerManager(this.entityManager!);
+        component.updateGameObjectPosition();
+    }
+
+    draw() {
         this.gl.useProgram(this.program);
 
         if (this.entitiesVAO != undefined) {

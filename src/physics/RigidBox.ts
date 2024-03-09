@@ -34,17 +34,40 @@ export class RigidBoxComponent extends Component {
     debugData: DebugData;
     box: RigidBox;
     entityManager: GraphicEntityManager<DebugData> | undefined;
+    bottomLeft: Vec2;
+    topRight: Vec2;
+
+    get bottomY(): number {
+        return this.bottomLeft.y;
+    }
+
+    get topY(): number {
+        return this.topRight.y;
+    }
+
+    get leftX(): number {
+        return this.bottomLeft.x;
+    }
+
+    get rightX(): number {
+        return this.topRight.x;
+    }
 
 
     constructor(box: RigidBox) {
         super();
         this.box = box;
         this.debugData = new DebugData(Vec2.Zero(), box.offset, box.size);
+        this.bottomLeft = box.offset;
+        this.topRight = Vec2.sum(box.offset, box.size);
     }
 
     setReferece(gameObject: GameObject): void {
         this.gameObject = gameObject;
-        this.gameObject.subscribeOnChangePosition(() => this.updateEntityManagerData());
+        this.bottomLeft = Vec2.sum(this.box.offset, this.gameObject.position);
+        this.topRight = Vec2.sum(Vec2.sum(this.box.offset, this.box.size), this.gameObject.position);
+
+        this.gameObject.subscribeOnChangePosition(() => this.updateGameObjectPosition());
     }
 
     get typeName(): string {
@@ -55,10 +78,17 @@ export class RigidBoxComponent extends Component {
         updateAction(this.box.velocity);
     }
 
-    updateEntityManagerData() {
+    updatePosition(updateAction: (position: Vec2) => void) {
+        this.gameObject && updateAction(this.gameObject.position);
+    }
+
+    updateGameObjectPosition() {
         if (this.gameObject != undefined) {
             this.debugData.updatePosition(this.gameObject.position);
             this.entityManager?.set(this.gameObject.id, this.debugData);
+
+            this.bottomLeft = Vec2.sum(this.box.offset, this.gameObject.position);
+            this.topRight = Vec2.sum(Vec2.sum(this.box.offset, this.box.size), this.gameObject.position);
         }
     }
 
