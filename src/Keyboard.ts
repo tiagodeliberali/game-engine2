@@ -20,4 +20,5 @@ export function isKeyPressed(key: string) {
 export class Keys {
     static readonly ArrowRight: string = "ArrowRight";
     static readonly ArrowLeft: string = "ArrowLeft";
+    static readonly ArrowUp: string = "ArrowUp";
 }

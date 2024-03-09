@@ -84,9 +84,9 @@ export class GraphicDebugger {
         this.entityManager = entityManager;
     }
 
-    public configureRigidBoxComponent(component: RigidBoxComponent, gameObject: GameObject) {
+    public configureRigidBoxComponent(component: RigidBoxComponent) {
         component.setDebuggerManager(this.entityManager!);
-        component.updateEntityManagerData(gameObject);
+        component.updateEntityManagerData();
     }
 
     public draw() {

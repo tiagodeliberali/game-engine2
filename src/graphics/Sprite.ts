@@ -33,7 +33,7 @@ export class SpriteData {
 export class SpriteComponent extends Component {
   public static readonly Name: string = "SpriteComponent";
   private entityData: EntityData;
-  private objectId: string| undefined;
+  private gameObject: GameObject | undefined;
   entityManager: GraphicEntityManager<EntityData> | undefined;
 
   constructor(data: SpriteData) {
@@ -43,21 +43,23 @@ export class SpriteComponent extends Component {
 
   updateSprite(data: SpriteData) {
     this.entityData.animation = data;
-    this.objectId && this.entityManager?.update(this.objectId, (entity) => entity.animation = this.entityData.animation);
+    this.gameObject && this.entityManager?.update(this.gameObject.id, (entity) => entity.animation = this.entityData.animation);
   }
 
   setReferece(gameObject: GameObject): void {
-    this.objectId = gameObject.id;
-    gameObject.subscribeOnChangePosition((gameObject) => this.updateEntityManagerData(gameObject));
+    this.gameObject = gameObject;
+    this.gameObject.subscribeOnChangePosition(() => this.updateEntityManagerData());
   }
 
   setManager(entityManager: GraphicEntityManager<EntityData>) {
     this.entityManager = entityManager;
   }
 
-  updateEntityManagerData(gameObject: GameObject) {
-    this.entityData.position.update(gameObject.position)
-    this.entityManager?.set(gameObject.id, this.entityData);
+  updateEntityManagerData() {
+    if (this.gameObject != undefined) {
+      this.entityData.position.update(this.gameObject.position)
+      this.entityManager?.set(this.gameObject.id, this.entityData);
+    }
   }
 
   get typeName(): string {

@@ -21,9 +21,10 @@ const run = async () => {
   const key = new GameObject(new Vec2(9 * 16, 3 * 16));
   key.add(new SpriteComponent(atlas.getSprite("key")!));
 
-  const character = new GameObject(new Vec2(4 * 16, 3 * 16));
+  const characterSpeed = 80;
+  const character = new GameObject(new Vec2(4 * 16, 10 * 16));
   const characterSprite = new SpriteComponent(atlas.getSprite("character_idle_right")!);
-  const characterBox = new RigidBoxComponent(new RigidBox(new Vec2(8, 13), new Vec2(4,0)));
+  const characterBox = new RigidBoxComponent(RigidBox.MovingBox(new Vec2(8, 13), new Vec2(4,0)));
   character.add(characterSprite);
   character.add(characterBox)
 
@@ -32,15 +33,15 @@ const run = async () => {
   var lastMove: string;
   const update = () => {
     if (isKeyPressed(Keys.ArrowLeft)) {
-      characterBox.setVelocity(new Vec2(-1, 0))
+      characterBox.updateVelocity((velocity) => velocity.x = -characterSpeed)
       characterSprite.updateSprite(atlas.getSprite("character_walk_left")!);
       lastMove = Keys.ArrowLeft;
     } else if (isKeyPressed(Keys.ArrowRight)) {
-      characterBox.setVelocity(new Vec2(1, 0))
+      characterBox.updateVelocity((velocity) => velocity.x = characterSpeed)
       characterSprite.updateSprite(atlas.getSprite("character_walk_right")!);
       lastMove = Keys.ArrowRight;
     } else {
-      characterBox.setVelocity(Vec2.Zero())
+      characterBox.updateVelocity((velocity) => velocity.x = 0)
       if (lastMove == Keys.ArrowLeft) {
         characterSprite.updateSprite(atlas.getSprite("character_idle_left")!);
         lastMove = "";
@@ -48,6 +49,10 @@ const run = async () => {
         characterSprite.updateSprite(atlas.getSprite("character_idle_right")!);
         lastMove = "";
       }
+    }
+
+    if (isKeyPressed(Keys.ArrowUp)) {
+      characterBox.updateVelocity((velocity) => velocity.y = 50)
     }
 
     scene.update();

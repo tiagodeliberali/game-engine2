@@ -3,23 +3,26 @@ import { Atlas } from "../graphics/Atlas";
 import { GraphicDebugger } from "../graphics/GraphicDebugger";
 import { GraphicProcessor } from "../graphics/GraphicProcessor";
 import { SpriteComponent } from "../graphics/Sprite";
+import { PhysicProcessor } from "../physics/PhysicProcessor";
 import { RigidBoxComponent } from "../physics/RigidBox";
 import { GameObject } from "./GameObject";
 
 export class Engine {
     private graphicProcessor: GraphicProcessor;
+    private physicProcessor: PhysicProcessor;
     private debugGraphicProcessor: GraphicDebugger | undefined;
     private gameObjects: GameObject[] = [];
 
-    private constructor(graphicProcessor: GraphicProcessor) {
+    private constructor(graphicProcessor: GraphicProcessor, physicProcessor: PhysicProcessor) {
         this.graphicProcessor = graphicProcessor;
+        this.physicProcessor = physicProcessor;
         initKeyboard();
     }
 
     public static async build(enableDebugtger: boolean) {
         const graphicProcessor = await GraphicProcessor.build();
         const debugGraphicProcessor = await GraphicDebugger.build();
-        const engine = new Engine(graphicProcessor);
+        const engine = new Engine(graphicProcessor, new PhysicProcessor());
         
         if (enableDebugtger) {
             engine.enableGraphicDebugger(debugGraphicProcessor);
@@ -45,16 +48,20 @@ export class Engine {
     private processComponents(gameObject: GameObject) {
         for (const component of gameObject.components) {
             if (component.typeName == SpriteComponent.Name) {
-                this.graphicProcessor.configureSpriteComponent(component as SpriteComponent, gameObject);                
-            } else if (component.typeName == RigidBoxComponent.Name) {
-                this.debugGraphicProcessor?.configureRigidBoxComponent(component as RigidBoxComponent, gameObject);                
-            } else {
+                this.graphicProcessor.configureSpriteComponent(component as SpriteComponent);                
+            } 
+            else if (component.typeName == RigidBoxComponent.Name) {
+                this.physicProcessor.configureRigidBoxComponent(component as RigidBoxComponent);                
+                this.debugGraphicProcessor?.configureRigidBoxComponent(component as RigidBoxComponent);                
+            } 
+            else {
                 this.gameObjects.push(gameObject);
             }
         }
     }
 
     public update() {
+        this.physicProcessor.update();
         this.graphicProcessor.draw();
         this.debugGraphicProcessor?.draw();
     }

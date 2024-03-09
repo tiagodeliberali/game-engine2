@@ -5,44 +5,61 @@ import { GraphicEntityManager } from "../graphics/EntityManager";
 import { DebugData } from "../graphics/GraphicDebugger";
 
 export class RigidBox {
-    offset: Vec2;
-    size: Vec2;
+    readonly isStatic: boolean;
+    readonly offset: Vec2;
+    readonly size: Vec2;
+    velocity: Vec2;
+    aceleration: Vec2;
 
-    constructor(size: Vec2, offset: Vec2) {
+    private constructor(size: Vec2, offset: Vec2, isStatic: boolean) {
         this.size = size;
         this.offset = offset;
+        this.velocity = Vec2.Zero();
+        this.aceleration = Vec2.Zero();
+        this.isStatic = isStatic;
+    }
+
+    static StaticBox(size: Vec2, offset: Vec2) {
+        return new RigidBox(size, offset, true);
+    }
+
+    static MovingBox(size: Vec2, offset: Vec2) {
+        return new RigidBox(size, offset, false);
     }
 }
 
 export class RigidBoxComponent extends Component {
     public static readonly Name: string = "RigidBoxComponent";
-    private gameObject: GameObject | undefined;
-    private velocity: Vec2 = Vec2.Zero();
-    box: DebugData;
+    gameObject: GameObject | undefined;
+    debugData: DebugData;
+    box: RigidBox;
     entityManager: GraphicEntityManager<DebugData> | undefined;
 
 
     constructor(box: RigidBox) {
         super();
-        this.box = new DebugData(Vec2.Zero(), box.offset, box.size);
+        this.box = box;
+        this.debugData = new DebugData(Vec2.Zero(), box.offset, box.size);
     }
 
     setReferece(gameObject: GameObject): void {
         this.gameObject = gameObject;
-        gameObject.subscribeOnChangePosition((gameObject) => this.updateEntityManagerData(gameObject));
+        this.gameObject.subscribeOnChangePosition(() => this.updateEntityManagerData());
     }
 
     get typeName(): string {
         return RigidBoxComponent.Name;
     }
 
-    setVelocity(velocity: Vec2) {
-        this.velocity = velocity;
+    updateVelocity(updateAction: (velocity: Vec2) => void) {
+        updateAction(this.box.velocity);
     }
 
-    updateEntityManagerData(gameObject: GameObject) {
-        this.box.updatePosition(gameObject.position);
-        this.entityManager?.set(gameObject.id, this.box);
+    updateEntityManagerData() {
+        if (this.gameObject != undefined) {
+            this.debugData.updatePosition(this.gameObject.position);
+            this.entityManager?.set(this.gameObject.id, this.debugData);
+        }
     }
 
     setDebuggerManager(entityManager: GraphicEntityManager<DebugData>) {

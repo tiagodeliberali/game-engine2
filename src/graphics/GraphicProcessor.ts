@@ -156,9 +156,9 @@ export class GraphicProcessor {
         this.entityManager = entityManager;
     }
 
-    public configureSpriteComponent(component: SpriteComponent, gameObject: GameObject) {
+    public configureSpriteComponent(component: SpriteComponent) {
         component.setManager(this.entityManager!);
-        component.updateEntityManagerData(gameObject);
+        component.updateEntityManagerData();
     }
 
     public draw() {
