@@ -34,6 +34,7 @@ export const buildProgram = async (canvasName: string, vertex: string, fragment:
 
     gl.enable(gl.BLEND);
     gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+    gl.clearColor(0,0,0,1);
     gl.uniform2fv(gl.getUniformLocation(program, "canvas"), [canvas.width / 2, canvas.height / 2]);
 
     return [gl!, program!];

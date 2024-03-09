@@ -163,6 +163,7 @@ export class GraphicProcessor {
 
     public draw() {
         this.gl.useProgram(this.program);
+        this.gl.clear(this.gl.COLOR_BUFFER_BIT);
         this.gl.uniform1f(this.uTick, this.uTickValue++);
 
         if (this.atlasVAO != undefined) {
