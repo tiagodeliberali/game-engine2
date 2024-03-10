@@ -46,10 +46,6 @@ export class PhysicProcessor {
                 this.checkColisionBetweenMovingBoxAndStaticBox(originalPosition, this.movingBoxes[i], this.staticBoxes[j]);
             }
         }
-
-        for (var i = 0; i < this.movingBoxes.length; i++) {
-
-        }
     }
 
     checkColisionBetweenMovingBoxes(box1: RigidBoxComponent, box2: RigidBoxComponent) {
