@@ -78,8 +78,13 @@ export class RigidBoxComponent extends Component {
         updateAction(this.box.velocity);
     }
 
-    updatePosition(updateAction: (position: Vec2) => void) {
-        this.gameObject && updateAction(this.gameObject.position);
+    updatePosition(updateAction: (position: Vec2) => Vec2) {
+        if (this.gameObject != undefined) {
+            const result = updateAction(this.gameObject.position);
+            this.gameObject.setPosition(result);
+            this.bottomLeft = Vec2.sum(this.box.offset, this.gameObject.position);
+            this.topRight = Vec2.sum(Vec2.sum(this.box.offset, this.box.size), this.gameObject.position);
+        }
     }
 
     updateGameObjectPosition() {

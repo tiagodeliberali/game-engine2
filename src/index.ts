@@ -22,7 +22,7 @@ const run = async () => {
   key.add(new SpriteComponent(atlas.getSprite("key")!));
 
   const characterSpeed = 80;
-  const character = new GameObject(new Vec2(4 * 16, 7 * 16));
+  const character = new GameObject(new Vec2(4 * 16, 9 * 16));
   const characterSprite = new SpriteComponent(atlas.getSprite("character_idle_right")!);
   const characterBox = new RigidBoxComponent(RigidBox.MovingBox(new Vec2(8, 13), new Vec2(4,0)));
   character.add(characterSprite);

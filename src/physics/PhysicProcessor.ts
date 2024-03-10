@@ -8,9 +8,6 @@ export class PhysicProcessor {
     staticBoxes: Array<RigidBoxComponent> = new Array<RigidBoxComponent>();
     lastTime: number = 0;
 
-    constructor() {
-    }
-
     configureRigidBoxComponent(rigidBox: RigidBoxComponent) {
         rigidBox.box.isStatic
             ? this.staticBoxes.push(rigidBox)
@@ -18,26 +15,6 @@ export class PhysicProcessor {
 
         // set global aceleration
         rigidBox.box.aceleration.y = -400;
-    }
-
-    update() {
-        var currentTime = performance.now();
-        var diff = (currentTime - this.lastTime) / 1000; // seconds
-        this.lastTime = currentTime;
-
-        this.movingBoxes.forEach(box => this.applyMoviment(box, diff))
-
-        for (var i = 0; i < this.movingBoxes.length - 1; i++) {
-            for (var j = i + 1; j < this.movingBoxes.length; j++) {
-                this.checkColisionBetweenMovingBoxes(this.movingBoxes[i], this.movingBoxes[j]);
-            }
-        }
-
-        for (var i = 0; i < this.movingBoxes.length; i++) {
-            for (var j = 0; j < this.staticBoxes.length; j++) {
-                this.checkColisionBetweenMovingBoxAndStaticBox(this.movingBoxes[i], this.staticBoxes[j]);
-            }
-        }
     }
 
     loadAtlas(atlas: Atlas) {
@@ -49,24 +26,68 @@ export class PhysicProcessor {
         });
     }
 
+    update() {
+        var currentTime = performance.now();
+        var diff = (currentTime - this.lastTime) / 1000; // seconds
+        this.lastTime = currentTime;
+
+        for (var i = 0; i < this.movingBoxes.length; i++) {
+            // check moviment
+            var originalPosition = this.movingBoxes[i].gameObject!.position.clone();
+
+            this.applyMoviment(this.movingBoxes[i], diff);
+
+            // check against all moving entities
+            for (var j = i + 1; j < this.movingBoxes.length; j++) {
+                this.checkColisionBetweenMovingBoxes(this.movingBoxes[i], this.movingBoxes[j]);
+            }
+
+            // check against all static entities
+            for (var j = 0; j < this.staticBoxes.length; j++) {
+                this.checkColisionBetweenMovingBoxAndStaticBox(originalPosition, this.movingBoxes[i], this.staticBoxes[j]);
+            } 
+        }
+
+        for (var i = 0; i < this.movingBoxes.length; i++) {
+            
+        }
+    }
+
     checkColisionBetweenMovingBoxes(box1: RigidBoxComponent, box2: RigidBoxComponent) {
 
     }
 
-    checkColisionBetweenMovingBoxAndStaticBox(movingBox: RigidBoxComponent, staticBox: RigidBoxComponent) {
-        // base of moving objecty collides with static top
-        if (movingBox.bottomY <= staticBox.topY && movingBox.topY >= staticBox.topY
-            && movingBox.rightX >= staticBox.leftX && movingBox.leftX <= staticBox.rightX) {
-            movingBox.updateVelocity((velocity) => velocity.y = 0);
-            movingBox.updatePosition((position) => position.y = staticBox.topY);
-        }
-
-        // right of moving objecty collides with static left
-        if (movingBox.rightX >= staticBox.leftX && movingBox.leftX <= staticBox.leftX
+    checkColisionBetweenMovingBoxAndStaticBox(originalPosition: Vec2, movingBox: RigidBoxComponent, staticBox: RigidBoxComponent) {
+        const collisionDistance = 0.01;
+        // collision!
+        if (movingBox.rightX >= staticBox.leftX && movingBox.leftX <= staticBox.rightX
             && movingBox.bottomY <= staticBox.topY && movingBox.topY >= staticBox.bottomY) {
-            movingBox.updateVelocity((velocity) => velocity.x = 0);
-            movingBox.updatePosition((position) => position.x = staticBox.leftX - movingBox.box.offset.x - movingBox.box.size.x);
-        }
+                const diff = Vec2.subtraction(movingBox.gameObject!.position, originalPosition);
+                
+                // going from top to botton
+                if (diff.y < 0 && -diff.y >= staticBox.topY - movingBox.bottomY) {
+                    movingBox.updateVelocity((velocity) => velocity.y = 0);
+                    movingBox.updatePosition((position) => { position.y = staticBox.topY - movingBox.box.offset.y; return position });
+                }
+
+                // going from botton to top
+                if (diff.y > 0 && diff.y >= movingBox.topY - staticBox.bottomY) {
+                    movingBox.updateVelocity((velocity) => velocity.y = 0);
+                    movingBox.updatePosition((position) => { position.y = staticBox.bottomY - movingBox.box.offset.y - movingBox.box.size.y; return position });
+                }
+
+                // going from right to left
+                if (diff.x < 0 && -diff.x >= staticBox.rightX - movingBox.leftX) {
+                    movingBox.updateVelocity((velocity) => velocity.x = 0);
+                    movingBox.updatePosition((position) => { position.x = staticBox.rightX - movingBox.box.offset.x; return position });
+                }
+
+                // going from left to right
+                if (diff.x > 0 && diff.x >= movingBox.rightX - staticBox.leftX) {
+                    movingBox.updateVelocity((velocity) => velocity.x = 0);
+                    movingBox.updatePosition((position) => { position.x = staticBox.leftX - movingBox.box.offset.x - movingBox.box.size.x; return position });
+                }
+            }
     }
 
     applyMoviment(component: RigidBoxComponent, timeSpan: number): void {
