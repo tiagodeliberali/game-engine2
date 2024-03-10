@@ -1,6 +1,6 @@
 import { Component } from "../core/Component";
 import { GameObject } from "../core/GameObject";
-import { Vec2 } from "../core/Math";
+import { IVec2, Vec2 } from "../core/Math";
 import { GraphicEntityManager } from "../graphics/EntityManager";
 import { DebugData } from "../graphics/GraphicDebugger";
 
@@ -78,7 +78,7 @@ export class RigidBoxComponent extends Component {
         updateAction(this.box.velocity);
     }
 
-    updatePosition(updateAction: (position: Vec2) => Vec2) {
+    updatePosition(updateAction: (position: IVec2) => IVec2) {
         if (this.gameObject != undefined) {
             const result = updateAction(this.gameObject.position);
             this.gameObject.setPosition(result);

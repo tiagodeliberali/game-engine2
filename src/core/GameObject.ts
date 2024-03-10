@@ -1,37 +1,47 @@
 import { Component } from "./Component";
 import { EventHandler, OnEvent } from "./EventHandler";
-import { Vec2 } from "./Math";
+import { IVec2, ReadOnlyVec2, Vec2 } from "./Math";
 
 var id = 1;
 
 export class GameObject {
     private onChangePosition: EventHandler<void> = new EventHandler<void>();
+    private readonly components: Array<Component>
+    private readonly _position: Vec2;
+    private readonly _readOnlyPosition: ReadOnlyVec2;
     readonly id: string
-    components: Array<Component>
-    position: Vec2;
 
-    constructor(position: Vec2) {
-        this.position = position;
+    constructor(position: IVec2) {
+        this._position = Vec2.clone(position);
+        this._readOnlyPosition = new ReadOnlyVec2(this._position);
 
         this.components = [];
         this.id = (id++).toString();
     }
 
-    public setPosition(position: Vec2) {
-        this.position = position;
+    get componentsIterable(): Iterable<Component> {
+        return this.components;
+    }
+
+    get position(): ReadOnlyVec2 {
+        return this._readOnlyPosition;
+    }
+
+    setPosition(position: IVec2) {
+        this._position.update(position);
         this.onChangePosition.fire();
     }
 
-    public updatePosition(updateAction: (position: Vec2) => void) {
-        updateAction(this.position);
+    updatePosition(updateAction: (position: IVec2) => IVec2) {
+        this._position.update(updateAction(this._readOnlyPosition));
         this.onChangePosition.fire();
     }
 
-    public subscribeOnChangePosition(action: OnEvent<void>) {
+    subscribeOnChangePosition(action: OnEvent<void>) {
         this.onChangePosition.subscribe(action);
     }
 
-    public add(component: Component) {
+    add(component: Component) {
         component.setReferece(this);
         this.components.push(component);
     }

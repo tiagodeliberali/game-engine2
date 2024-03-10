@@ -33,7 +33,7 @@ test('Update vec2 copy values from external Vec2', () => {
 test('Clone vec2 creates a new instance', () => {
     const vec = new Vec2(4, 5);
 
-    const cloned = vec.clone();
+    const cloned = Vec2.clone(vec);
     vec.x = 10;
     vec.y = 20;
 

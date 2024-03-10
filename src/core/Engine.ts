@@ -48,7 +48,7 @@ export class Engine {
     }
 
     private processComponents(gameObject: GameObject) {
-        for (const component of gameObject.components) {
+        for (const component of gameObject.componentsIterable) {
             if (component.typeName == SpriteComponent.Name) {
                 this.graphicProcessor.configureSpriteComponent(component as SpriteComponent);                
             } 

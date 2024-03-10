@@ -1,5 +1,5 @@
 import { GameObject } from "../core/GameObject";
-import { Vec2 } from "../core/Math";
+import { IVec2, Vec2 } from "../core/Math";
 import { RigidBoxComponent } from "../physics/RigidBox";
 import { Atlas } from "./Atlas";
 import { GraphicEntityManager, IEntityType } from "./EntityManager";
@@ -18,7 +18,7 @@ export class DebugData implements IEntityType {
         this.size = size;
     }
 
-    updatePosition(position: Vec2) {
+    updatePosition(position: IVec2) {
         this.position = Vec2.sum(position, this.offset);
     }
 
