@@ -3,12 +3,28 @@
  * Only works with integer numbers and round to integer to keep everything pixel size
  */
 export class Vec2 {
-    x: number;
-    y: number;
+    private _x: number;
+    private _y: number;
+
+    get x(): number {
+        return this._x;
+    }
+
+    set x(value: number) {
+        this._x = Math.round(value);
+    }
+
+    get y(): number {
+        return this._y;
+    }
+
+    set y(value: number) {
+        this._y = Math.round(value);
+    }
 
     constructor(x: number, y: number) {
-        this.x = Math.round(x);
-        this.y = Math.round(y);
+        this._x = Math.round(x);
+        this._y = Math.round(y);
     }
 
     static Zero() {
@@ -24,8 +40,8 @@ export class Vec2 {
     }
 
     update(position: Vec2) {
-        this.x = Math.round(position.x);
-        this.y = Math.round(position.y);
+        this._x = Math.round(position.x);
+        this._y = Math.round(position.y);
     }
 
     clone() {

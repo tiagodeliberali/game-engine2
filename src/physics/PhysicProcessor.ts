@@ -62,28 +62,28 @@ export class PhysicProcessor {
         // collision!
         if (movingBox.rightX >= staticBox.leftX && movingBox.leftX <= staticBox.rightX
             && movingBox.bottomY <= staticBox.topY && movingBox.topY >= staticBox.bottomY) {
-                const diff = Vec2.subtraction(movingBox.gameObject!.position, originalPosition);
+                var diff = Vec2.subtraction(movingBox.gameObject!.position, originalPosition);
                 
                 // going from top to botton
                 if (diff.y < 0 && -diff.y >= staticBox.topY - movingBox.bottomY) {
                     movingBox.updateVelocity((velocity) => velocity.y = 0);
-                    movingBox.updatePosition((position) => { position.y = staticBox.topY - movingBox.box.offset.y; return position });
+                    movingBox.updatePosition((position) => { position.y = staticBox.topY - movingBox.box.offset.y + 1; return position });
                 }
 
                 // going from botton to top
-                if (diff.y > 0 && diff.y >= movingBox.topY - staticBox.bottomY) {
+                else if (diff.y > 0 && diff.y >= movingBox.topY - staticBox.bottomY) {
                     movingBox.updateVelocity((velocity) => velocity.y = 0);
                     movingBox.updatePosition((position) => { position.y = staticBox.bottomY - movingBox.box.offset.y - movingBox.box.size.y; return position });
                 }
 
                 // going from right to left
-                if (diff.x < 0 && -diff.x >= staticBox.rightX - movingBox.leftX) {
+                else if (diff.x < 0 && -diff.x >= staticBox.rightX - movingBox.leftX) {
                     movingBox.updateVelocity((velocity) => velocity.x = 0);
-                    movingBox.updatePosition((position) => { position.x = staticBox.rightX - movingBox.box.offset.x; return position });
+                    movingBox.updatePosition((position) => { position.x = staticBox.rightX - movingBox.box.offset.x + 1; return position });
                 }
 
                 // going from left to right
-                if (diff.x > 0 && diff.x >= movingBox.rightX - staticBox.leftX) {
+                else if (diff.x > 0 && diff.x >= movingBox.rightX - staticBox.leftX) {
                     movingBox.updateVelocity((velocity) => velocity.x = 0);
                     movingBox.updatePosition((position) => { position.x = staticBox.leftX - movingBox.box.offset.x - movingBox.box.size.x; return position });
                 }

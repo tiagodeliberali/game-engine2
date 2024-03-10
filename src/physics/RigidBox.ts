@@ -34,15 +34,15 @@ export class RigidBoxComponent extends Component {
     debugData: DebugData;
     box: RigidBox;
     entityManager: GraphicEntityManager<DebugData> | undefined;
-    bottomLeft: Vec2;
-    topRight: Vec2;
+    private bottomLeft: Vec2;
+    private topRight: Vec2;
 
     get bottomY(): number {
         return this.bottomLeft.y;
     }
 
     get topY(): number {
-        return this.topRight.y;
+        return this.topRight.y - 1;
     }
 
     get leftX(): number {
@@ -50,7 +50,7 @@ export class RigidBoxComponent extends Component {
     }
 
     get rightX(): number {
-        return this.topRight.x;
+        return this.topRight.x - 1;
     }
 
 
