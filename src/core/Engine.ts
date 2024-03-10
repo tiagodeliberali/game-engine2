@@ -1,4 +1,4 @@
-import { initKeyboard } from "../Keyboard";
+import { initKeyboard } from "../inputs/Keyboard";
 import { Atlas } from "../graphics/Atlas";
 import { GraphicDebugger } from "../graphics/GraphicDebugger";
 import { GraphicProcessor } from "../graphics/GraphicProcessor";

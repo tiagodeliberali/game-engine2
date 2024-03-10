@@ -1,5 +1,5 @@
 import { AtlasBuilder } from "./graphics/Atlas";
-import { Keys, isKeyPressed } from "./Keyboard";
+import { Keys, isKeyPressed } from "./inputs/Keyboard";
 import { Engine } from "./core/Engine";
 import { GameObject } from "./core/GameObject";
 import { SpriteComponent } from "./graphics/Sprite";
