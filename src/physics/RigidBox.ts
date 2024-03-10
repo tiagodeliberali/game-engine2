@@ -1,22 +1,18 @@
 import { Component } from "../core/Component";
 import { GameObject } from "../core/GameObject";
-import { IVec2, Vec2 } from "../core/Math";
+import { IVec2, ReadOnlyVec2, Vec2 } from "../core/Math";
 import { GraphicEntityManager } from "../graphics/EntityManager";
 import { DebugData } from "../graphics/GraphicDebugger";
 
 export class RigidBox {
     readonly isStatic: boolean;
-    readonly offset: Vec2;
-    readonly size: Vec2;
-    velocity: Vec2;
-    aceleration: Vec2;
+    readonly offset: ReadOnlyVec2;
+    readonly size: ReadOnlyVec2;
 
-    private constructor(size: Vec2, offset: Vec2, isStatic: boolean) {
-        this.size = size;
-        this.offset = offset;
-        this.velocity = Vec2.zero();
-        this.aceleration = Vec2.zero();
+    private constructor(size: IVec2, offset: IVec2, isStatic: boolean) {
         this.isStatic = isStatic;
+        this.size = new ReadOnlyVec2(Vec2.clone(size));
+        this.offset = new ReadOnlyVec2(Vec2.clone(offset));
     }
 
     static StaticBox(size: Vec2, offset: Vec2) {
@@ -30,12 +26,18 @@ export class RigidBox {
 
 export class RigidBoxComponent extends Component {
     public static readonly Name: string = "RigidBoxComponent";
-    gameObject: GameObject | undefined;
-    debugData: DebugData;
-    box: RigidBox;
-    entityManager: GraphicEntityManager<DebugData> | undefined;
+    private _gameObject: GameObject | undefined;
+    private box: RigidBox;
     private bottomLeft: Vec2;
     private topRight: Vec2;
+    private debugData: DebugData;
+    private entityManager: GraphicEntityManager<DebugData> | undefined;
+    velocity: Vec2;
+    aceleration: Vec2;
+
+    get isStatic() {
+        return this.box.isStatic;
+    }
 
     get bottomY(): number {
         return this.bottomLeft.y;
@@ -53,48 +55,60 @@ export class RigidBoxComponent extends Component {
         return this.topRight.x - 1;
     }
 
+    get position(): IVec2 {
+        return this._gameObject!.position;
+    }
+
+    set position(pos: IVec2) {
+        this.setPosition(pos);
+    }
+
+    set x(value: number) {
+        this.setPosition(new Vec2(value - this.box.offset.x, this.position.y));
+    }
+
+    get width() {
+        return this.box.size.x;
+    }
+
+    set y(value: number) {
+        this.setPosition(new Vec2(this.position.x, value - this.box.offset.y));
+    }
+
+    get height() {
+        return this.box.size.y;
+    }
 
     constructor(box: RigidBox) {
         super();
         this.box = box;
         this.debugData = new DebugData(Vec2.zero(), box.offset, box.size);
-        this.bottomLeft = box.offset;
+        this.bottomLeft = Vec2.clone(box.offset);
         this.topRight = Vec2.sum(box.offset, box.size);
-    }
-
-    setReferece(gameObject: GameObject): void {
-        this.gameObject = gameObject;
-        this.bottomLeft = Vec2.sum(this.box.offset, this.gameObject.position);
-        this.topRight = Vec2.sum(Vec2.sum(this.box.offset, this.box.size), this.gameObject.position);
-
-        this.gameObject.subscribeOnChangePosition(() => this.updateGameObjectPosition());
+        this.velocity = Vec2.zero();
+        this.aceleration = Vec2.zero();
     }
 
     get typeName(): string {
         return RigidBoxComponent.Name;
     }
 
-    updateVelocity(updateAction: (velocity: Vec2) => void) {
-        updateAction(this.box.velocity);
+    setReferece(gameObject: GameObject): void {
+        this._gameObject = gameObject;
+        this._gameObject.subscribeOnChangePosition(() => this.updateGameObjectPosition());
+        this.updateGameObjectPosition();
     }
 
-    updatePosition(updateAction: (position: IVec2) => IVec2) {
-        if (this.gameObject != undefined) {
-            const result = updateAction(this.gameObject.position);
-            this.gameObject.setPosition(result);
-            this.bottomLeft = Vec2.sum(this.box.offset, this.gameObject.position);
-            this.topRight = Vec2.sum(Vec2.sum(this.box.offset, this.box.size), this.gameObject.position);
-        }
+    private setPosition(vec: IVec2) {
+        this._gameObject!.setPosition(vec);
     }
 
     updateGameObjectPosition() {
-        if (this.gameObject != undefined) {
-            this.debugData.updatePosition(this.gameObject.position);
-            this.entityManager?.set(this.gameObject.id, this.debugData);
+        this.debugData.updatePosition(this.position);
+        this.entityManager?.set(this._gameObject!.id, this.debugData);
 
-            this.bottomLeft = Vec2.sum(this.box.offset, this.gameObject.position);
-            this.topRight = Vec2.sum(Vec2.sum(this.box.offset, this.box.size), this.gameObject.position);
-        }
+        this.bottomLeft = Vec2.sum(this.box.offset, this.position);
+        this.topRight = Vec2.sum(Vec2.sum(this.box.offset, this.box.size), this.position);
     }
 
     setDebuggerManager(entityManager: GraphicEntityManager<DebugData>) {

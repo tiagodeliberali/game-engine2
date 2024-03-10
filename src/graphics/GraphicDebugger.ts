@@ -1,4 +1,3 @@
-import { GameObject } from "../core/GameObject";
 import { IVec2, Vec2 } from "../core/Math";
 import { RigidBoxComponent } from "../physics/RigidBox";
 import { Atlas } from "./Atlas";
@@ -8,11 +7,11 @@ import { buildProgram } from "./GraphicCore";
 export class DebugData implements IEntityType {
     static ENTITY_ROW_SIZE: number = 6 * 6;
     
-    private position: Vec2;
-    private offset: Vec2;
-    private size: Vec2;
+    private position: IVec2;
+    private offset: IVec2;
+    private size: IVec2;
 
-    constructor(position: Vec2, offset: Vec2, size: Vec2) {
+    constructor(position: IVec2, offset: IVec2, size: IVec2) {
         this.position = Vec2.sum(position, offset);
         this.offset = offset;
         this.size = size;

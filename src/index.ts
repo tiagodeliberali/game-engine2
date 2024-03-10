@@ -33,15 +33,15 @@ const run = async () => {
   var lastMove: string;
   const update = () => {
     if (isKeyPressed(Keys.ArrowLeft)) {
-      characterBox.updateVelocity((velocity) => velocity.x = -characterSpeed)
+      characterBox.velocity.x = -characterSpeed;
       characterSprite.updateSprite(atlas.getSprite("character_walk_left")!);
       lastMove = Keys.ArrowLeft;
     } else if (isKeyPressed(Keys.ArrowRight)) {
-      characterBox.updateVelocity((velocity) => velocity.x = characterSpeed)
+      characterBox.velocity.x = characterSpeed;
       characterSprite.updateSprite(atlas.getSprite("character_walk_right")!);
       lastMove = Keys.ArrowRight;
     } else {
-      characterBox.updateVelocity((velocity) => velocity.x = 0)
+      characterBox.velocity.x = 0;
       if (lastMove == Keys.ArrowLeft) {
         characterSprite.updateSprite(atlas.getSprite("character_idle_left")!);
         lastMove = "";
@@ -52,7 +52,7 @@ const run = async () => {
     }
 
     if (isKeyPressed(Keys.Space)) {
-      characterBox.updateVelocity((velocity) => velocity.y = 100)
+      characterBox.velocity.y = 100;  
     }
 
     scene.update();
