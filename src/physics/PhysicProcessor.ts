@@ -19,7 +19,7 @@ export class PhysicProcessor {
 
     loadAtlas(atlas: Atlas) {
         atlas.rigidBoxes.forEach((boxPosition) => {
-            const component = new RigidBoxComponent(RigidBox.StaticBox(new Vec2(atlas.tileSize, atlas.tileSize), Vec2.Zero()));
+            const component = new RigidBoxComponent(RigidBox.StaticBox(new Vec2(atlas.tileSize, atlas.tileSize), Vec2.zero()));
             component.debugData.updatePosition(boxPosition);
             component.setReferece(new GameObject(boxPosition));
             this.staticBoxes.push(component);
@@ -62,7 +62,7 @@ export class PhysicProcessor {
         // collision!
         if (movingBox.rightX >= staticBox.leftX && movingBox.leftX <= staticBox.rightX
             && movingBox.bottomY <= staticBox.topY && movingBox.topY >= staticBox.bottomY) {
-                var diff = Vec2.subtraction(movingBox.gameObject!.position, originalPosition);
+                var diff = Vec2.subtrac(movingBox.gameObject!.position, originalPosition);
                 
                 // going from top to botton
                 if (diff.y < 0 && -diff.y >= staticBox.topY - movingBox.bottomY) {

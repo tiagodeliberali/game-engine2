@@ -14,8 +14,8 @@ export class RigidBox {
     private constructor(size: Vec2, offset: Vec2, isStatic: boolean) {
         this.size = size;
         this.offset = offset;
-        this.velocity = Vec2.Zero();
-        this.aceleration = Vec2.Zero();
+        this.velocity = Vec2.zero();
+        this.aceleration = Vec2.zero();
         this.isStatic = isStatic;
     }
 
@@ -57,7 +57,7 @@ export class RigidBoxComponent extends Component {
     constructor(box: RigidBox) {
         super();
         this.box = box;
-        this.debugData = new DebugData(Vec2.Zero(), box.offset, box.size);
+        this.debugData = new DebugData(Vec2.zero(), box.offset, box.size);
         this.bottomLeft = box.offset;
         this.topRight = Vec2.sum(box.offset, box.size);
     }

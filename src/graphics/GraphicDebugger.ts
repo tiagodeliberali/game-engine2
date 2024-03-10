@@ -87,7 +87,7 @@ export class GraphicDebugger {
     
     loadAtlas(atlasData: Atlas) {
         var i = 0;
-        atlasData.rigidBoxes.forEach((box) => this.entityManager?.set(`rigid_box_${i++}`, new DebugData(box, Vec2.Zero(), new Vec2(atlasData.tileSize, atlasData.tileSize))))
+        atlasData.rigidBoxes.forEach((box) => this.entityManager?.set(`rigid_box_${i++}`, new DebugData(box, Vec2.zero(), new Vec2(atlasData.tileSize, atlasData.tileSize))))
     }
 
     configureRigidBoxComponent(component: RigidBoxComponent) {

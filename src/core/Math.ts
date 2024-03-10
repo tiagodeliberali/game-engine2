@@ -27,7 +27,7 @@ export class Vec2 {
         this._y = Math.round(y);
     }
 
-    static Zero() {
+    static zero() {
         return new Vec2(0, 0);
     }
 
@@ -35,13 +35,14 @@ export class Vec2 {
         return new Vec2(v1.x + v2.x, v1.y + v2.y);
     }
 
-    static subtraction(v1: Vec2, v2: Vec2) {
+    static subtrac(v1: Vec2, v2: Vec2) {
         return new Vec2(v1.x - v2.x, v1.y - v2.y);
     }
 
-    update(position: Vec2) {
-        this._x = Math.round(position.x);
-        this._y = Math.round(position.y);
+    update(anotherVec: Vec2) {
+        // doesn't need to run Math.round since it is coming from another Vec2 and the value needs to be an integer
+        this._x = anotherVec.x;
+        this._y = anotherVec.y;
     }
 
     clone() {

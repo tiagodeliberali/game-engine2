@@ -38,7 +38,7 @@ export class SpriteComponent extends Component {
 
   constructor(data: SpriteData) {
     super();
-    this.entityData = new EntityData(Vec2.Zero(), data);
+    this.entityData = new EntityData(Vec2.zero(), data);
   }
 
   updateSprite(data: SpriteData) {
