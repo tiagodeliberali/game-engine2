@@ -61,6 +61,8 @@ const loadEntities = (gl: WebGL2RenderingContext, entityBufferData: Float32Array
 export class GraphicDebugger {
     private gl: WebGL2RenderingContext;
     private program: WebGLProgram;
+
+    private uCamera: WebGLUniformLocation;
     
     private entitiesVAO: WebGLVertexArrayObject | undefined;
     private modelBuffer: WebGLBuffer | undefined;
@@ -69,6 +71,7 @@ export class GraphicDebugger {
     private constructor(gl: WebGL2RenderingContext, program: WebGLProgram) {
         this.gl = gl;
         this.program = program;
+        this.uCamera = gl.getUniformLocation(program, "uCamera")!;
     }
     
     static async build() {
@@ -94,8 +97,9 @@ export class GraphicDebugger {
         component.updateGameObjectPosition();
     }
 
-    draw() {
+    draw(camera: Array<number>) {
         this.gl.useProgram(this.program);
+        this.gl.uniform2fv(this.uCamera, camera);
 
         if (this.entitiesVAO != undefined) {
             const entityDiff = this.entityManager!.diff();

@@ -8,8 +8,9 @@ import { RigidBox, RigidBoxComponent } from "./physics/RigidBox";
 
 const run = async () => {
   const atlas = await AtlasBuilder.load("mario");
+  const camera: Array<number> = [0, 0];
   
-  const scene = await Engine.build(true);
+  const scene = await Engine.build(true, camera);
   scene.loadAtlas(atlas);
 
   const coin1 = new GameObject(new Vec2(7 * 16, 4 * 16));
@@ -55,6 +56,11 @@ const run = async () => {
       characterBox.velocity.y = 100;  
     }
 
+    camera[0] = Math.max(0, characterBox.leftX - 64);
+    if (characterBox.leftX < 0) {
+      characterBox.x = 0;
+    }
+ 
     scene.update();
     requestAnimationFrame(update);
   }

@@ -120,6 +120,7 @@ export class GraphicProcessor {
     private program: WebGLProgram;
 
     private uTick: WebGLUniformLocation;
+    private uCamera: WebGLUniformLocation;
     private uTickValue: number = 0;
 
     private atlasVAO: WebGLVertexArrayObject | undefined;
@@ -134,6 +135,7 @@ export class GraphicProcessor {
         this.program = program;
 
         this.uTick = gl.getUniformLocation(program, "uTick")!;
+        this.uCamera = gl.getUniformLocation(program, "uCamera")!;
     }
 
     public static async build() {
@@ -161,10 +163,11 @@ export class GraphicProcessor {
         component.updateEntityManagerData();
     }
 
-    public draw() {
+    public draw(camera: Array<number>) {
         this.gl.useProgram(this.program);
         this.gl.clear(this.gl.COLOR_BUFFER_BIT);
         this.gl.uniform1f(this.uTick, this.uTickValue++);
+        this.gl.uniform2fv(this.uCamera, camera);
 
         if (this.atlasVAO != undefined) {
             this.gl.bindVertexArray(this.atlasVAO);

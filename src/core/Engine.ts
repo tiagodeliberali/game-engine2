@@ -12,17 +12,19 @@ export class Engine {
     private physicProcessor: PhysicProcessor;
     private debugGraphicProcessor: GraphicDebugger | undefined;
     private gameObjects: GameObject[] = [];
+    private camera: Array<number>;
 
-    private constructor(graphicProcessor: GraphicProcessor, physicProcessor: PhysicProcessor) {
+    private constructor(graphicProcessor: GraphicProcessor, physicProcessor: PhysicProcessor, camera: Array<number>) {
         this.graphicProcessor = graphicProcessor;
         this.physicProcessor = physicProcessor;
+        this.camera = camera;
         initKeyboard();
     }
 
-    public static async build(enableDebugtger: boolean) {
+    public static async build(enableDebugtger: boolean, camera: Array<number>) {
         const graphicProcessor = await GraphicProcessor.build();
         const debugGraphicProcessor = await GraphicDebugger.build();
-        const engine = new Engine(graphicProcessor, new PhysicProcessor());
+        const engine = new Engine(graphicProcessor, new PhysicProcessor(), camera);
         
         if (enableDebugtger) {
             engine.enableGraphicDebugger(debugGraphicProcessor);
@@ -63,9 +65,8 @@ export class Engine {
     }
 
     public update() {
-        const camera = [100, 10];
-        this.graphicProcessor.draw(camera);
-        this.debugGraphicProcessor?.draw(camera);
+        this.graphicProcessor.draw(this.camera);
+        this.debugGraphicProcessor?.draw(this.camera);
         this.physicProcessor.update();
     }
 }
