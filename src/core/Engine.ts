@@ -63,8 +63,9 @@ export class Engine {
     }
 
     public update() {
-        this.graphicProcessor.draw();
-        this.debugGraphicProcessor?.draw();
+        const camera = [100, 10];
+        this.graphicProcessor.draw(camera);
+        this.debugGraphicProcessor?.draw(camera);
         this.physicProcessor.update();
     }
 }
