@@ -4,6 +4,8 @@ import { Atlas } from "./Atlas";
 import { GraphicEntityManager, IEntityType } from "./EntityManager";
 import { buildProgram } from "./GraphicCore";
 
+const divisionSize = 1;
+
 export class DebugData implements IEntityType {
     static ENTITY_ROW_SIZE: number = 6 * 6;
     
@@ -27,12 +29,12 @@ export class DebugData implements IEntityType {
 
     buildEntityDataRow() {
         return [
-            this.position.x,                this.position.y,                1, 0, 0, 0.5,
-            this.position.x + this.size.x,  this.position.y + this.size.y,  1, 0, 0, 0.5,
-            this.position.x,                this.position.y + this.size.y,  1, 0, 0, 0.5,
-            this.position.x,                this.position.y,                1, 0, 0, 0.5,
-            this.position.x + this.size.x,  this.position.y,                1, 0, 0, 0.5,
-            this.position.x + this.size.x,  this.position.y + this.size.y,  1, 0, 0, 0.5,
+            this.position.x + divisionSize,                this.position.y + divisionSize,                1, 0, 0, 0.5,
+            this.position.x + this.size.x - divisionSize,  this.position.y + this.size.y - divisionSize,  1, 0, 0, 0.5,
+            this.position.x + divisionSize,                this.position.y + this.size.y - divisionSize,  1, 0, 0, 0.5,
+            this.position.x + divisionSize,                this.position.y + divisionSize,                1, 0, 0, 0.5,
+            this.position.x + this.size.x - divisionSize,  this.position.y + divisionSize,                1, 0, 0, 0.5,
+            this.position.x + this.size.x - divisionSize,  this.position.y + this.size.y - divisionSize,  1, 0, 0, 0.5,
         ]
     }
 }
@@ -88,7 +90,7 @@ export class GraphicDebugger {
     }
     
     loadAtlas(atlasData: Atlas) {
-        var i = 0;
+        let i = 0;
         atlasData.rigidBoxes.forEach((box) => this.entityManager?.set(`rigid_box_${i++}`, new DebugData(box, Vec2.zero(), new Vec2(atlasData.tileSize, atlasData.tileSize))))
     }
 

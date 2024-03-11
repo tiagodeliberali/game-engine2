@@ -34,7 +34,7 @@ const aOffset = 2;
 const aDepth = 3;
 const aAnimation = 4;
 
-var modelBufferReference: WebGLVertexArrayObject | undefined;
+let modelBufferReference: WebGLVertexArrayObject | undefined;
 const bindModelBuffer = (gl: WebGL2RenderingContext) => {
     if (modelBufferReference == undefined) {
         modelBufferReference = gl.createBuffer()!;

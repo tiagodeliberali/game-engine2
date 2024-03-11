@@ -62,7 +62,7 @@ export class GraphicEntityManager<Type extends IEntityType> {
     const entityArray = Array.from(this.entities.values());
     const transformBuffer = new Float32Array(this.entities.size * entityArray.at(0)!.data.entityRowSize);
 
-    var offset = 0;
+    let offset = 0;
 
     entityArray.forEach((item) => {
       item.offset = offset++;

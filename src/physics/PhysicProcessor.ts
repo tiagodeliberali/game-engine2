@@ -26,23 +26,23 @@ export class PhysicProcessor {
     }
 
     update() {
-        var currentTime = performance.now();
-        var diff = (currentTime - this.lastTime) / 1000; // seconds
+        const currentTime = performance.now();
+        const diff = (currentTime - this.lastTime) / 1000; // seconds
         this.lastTime = currentTime;
 
-        for (var i = 0; i < this.movingBoxes.length; i++) {
+        for (let i = 0; i < this.movingBoxes.length; i++) {
             // check moviment
-            var originalPosition = Vec2.clone(this.movingBoxes[i].position);
+            const originalPosition = Vec2.clone(this.movingBoxes[i].position);
 
             this.applyMoviment(this.movingBoxes[i], diff);
 
             // check against all moving entities
-            for (var j = i + 1; j < this.movingBoxes.length; j++) {
+            for (let j = i + 1; j < this.movingBoxes.length; j++) {
                 this.checkColisionBetweenMovingBoxes(this.movingBoxes[i], this.movingBoxes[j]);
             }
 
             // check against all static entities
-            for (var j = 0; j < this.staticBoxes.length; j++) {
+            for (let j = 0; j < this.staticBoxes.length; j++) {
                 this.checkColisionBetweenMovingBoxAndStaticBox(originalPosition, this.movingBoxes[i], this.staticBoxes[j]);
             }
         }
@@ -56,7 +56,7 @@ export class PhysicProcessor {
         // collision!
         if (movingBox.rightX >= staticBox.leftX && movingBox.leftX <= staticBox.rightX
             && movingBox.bottomY <= staticBox.topY && movingBox.topY >= staticBox.bottomY) {
-            var diff = Vec2.subtrac(movingBox.position, originalPosition);
+            const diff = Vec2.subtrac(movingBox.position, originalPosition);
 
             // from top
             if (diff.y < 0 && -diff.y >= staticBox.topY - movingBox.bottomY) {

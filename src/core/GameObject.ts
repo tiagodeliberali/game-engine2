@@ -2,7 +2,7 @@ import { Component } from "./Component";
 import { EventHandler, OnEvent } from "./EventHandler";
 import { IVec2, ReadOnlyVec2, Vec2 } from "./Math";
 
-var id = 1;
+let id = 1;
 
 export class GameObject {
     private onChangePosition: EventHandler<void> = new EventHandler<void>();

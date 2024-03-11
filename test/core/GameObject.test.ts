@@ -13,7 +13,7 @@ test('GameObjects instances have a outo increment id', () => {
 test('GameObject fires event on set position', () => {
     const gameObject = new GameObject(Vec2.zero());
 
-    var isTriggered = false;
+    let isTriggered = false;
     gameObject.subscribeOnChangePosition(() => isTriggered = true);
 
     gameObject.setPosition(new Vec2(2, 3));
@@ -26,7 +26,7 @@ test('GameObject fires event on set position', () => {
 test('GameObject fires event on update position', () => {
     const gameObject = new GameObject(new Vec2(2, 3));
 
-    var isTriggered = false;
+    let isTriggered = false;
     gameObject.subscribeOnChangePosition(() => isTriggered = true);
 
     gameObject.updatePosition((position) => new Vec2(position.x * 2, position.y * 3));
@@ -42,8 +42,8 @@ test('Add component sets reference to gameObject', () => {
 
     gameObject.add(component);
 
-    var totalItems = 0;
-    for (const c of gameObject.componentsIterable) {
+    let totalItems = 0;
+    for (const _ of gameObject.componentsIterable) {
         totalItems++;
     }
 

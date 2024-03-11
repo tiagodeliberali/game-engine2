@@ -31,7 +31,7 @@ const run = async () => {
 
   scene.add([coin1, coin2, key, character])
   
-  var lastMove: string;
+  let lastMove: string;
   const update = () => {
     if (isKeyPressed(Keys.ArrowLeft)) {
       characterBox.velocity.x = -characterSpeed;

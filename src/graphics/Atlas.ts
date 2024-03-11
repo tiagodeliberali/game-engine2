@@ -85,16 +85,16 @@ export class AtlasBuilder {
         const rigidBoxes = Array<Vec2>(totalRigidBoxes);
 
         // avoid memory allocation on each iteration
-        var layer = new Layer();
-        var tile = new Tile();
+        let layer = new Layer();
+        let tile = new Tile();
         
-        var offset = 0;
+        let offset = 0;
 
-        for (var layerIndex = this.data.layers.length - 1; layerIndex >= 0; layerIndex--)
+        for (let layerIndex = this.data.layers.length - 1; layerIndex >= 0; layerIndex--)
         {
             layer = this.data.layers[layerIndex];
 
-            for (var tileIndex = 0; tileIndex < layer.tiles.length; tileIndex++)
+            for (let tileIndex = 0; tileIndex < layer.tiles.length; tileIndex++)
             {
                 tile = layer.tiles[tileIndex];
                 const x = tile.x * this.data.tileSize;
