@@ -43,7 +43,8 @@ test('Add component sets reference to gameObject', () => {
     gameObject.add(component);
 
     let totalItems = 0;
-    for (const _ of gameObject.componentsIterable) {
+    const iterator = gameObject.componentsIterable[Symbol.iterator]();
+    while (!iterator.next().done) {
         totalItems++;
     }
 

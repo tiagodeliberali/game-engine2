@@ -1,4 +1,3 @@
-import { GameObject } from "../core/GameObject";
 import { Vec2 } from "../core/Math";
 import { AtlasBuilder, Atlas } from "./Atlas";
 import { buildProgram } from "./GraphicCore";

@@ -48,6 +48,7 @@ export class PhysicProcessor {
         }
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     checkColisionBetweenMovingBoxes(box1: RigidBoxComponent, box2: RigidBoxComponent) {
 
     }
