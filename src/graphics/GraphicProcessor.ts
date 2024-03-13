@@ -183,7 +183,6 @@ export class GraphicProcessor {
             }
 
             if (entityDiff.type == "diff") {
-                console.info("Diff partial");
                 this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.entityTransformBuffer!);
                 (entityDiff.data as [number, EntityData][]).forEach(([offset, data]) => {
                     this.gl.bufferSubData(

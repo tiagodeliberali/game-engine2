@@ -4,7 +4,7 @@ import { Atlas } from "./Atlas";
 import { GraphicEntityManager, IEntityType } from "./EntityManager";
 import { buildProgram } from "./GraphicCore";
 
-const divisionSize = 1;
+const divisionSize = 0;
 
 export class DebugData implements IEntityType {
     static ENTITY_ROW_SIZE: number = 6 * 6;
@@ -113,7 +113,6 @@ export class GraphicDebugger {
             }
 
             if (entityDiff.type == "diff") {
-                console.info("Diff partial");
                 this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.modelBuffer!);
                 (entityDiff.data as [number, DebugData][]).forEach(([offset, data]) => {
                     this.gl.bufferSubData(
