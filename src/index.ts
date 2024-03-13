@@ -7,6 +7,10 @@ import { Vec2 } from "./core/Math";
 import { RigidBox, RigidBoxComponent } from "./physics/RigidBox";
 
 const run = async () => {
+  // debug
+  const frameRate = document.querySelector<HTMLSpanElement>("#frameRate")!;
+  const characterPosition = document.querySelector<HTMLSpanElement>("#characterPosition")!;
+
   const atlas = await AtlasBuilder.load("mario");
   const camera: Array<number> = [0, 0];
   
@@ -32,6 +36,8 @@ const run = async () => {
   scene.add([coin1, coin2, key, character])
   
   let lastMove: string;
+
+  let time = performance.now();
   const update = () => {
     if (isKeyPressed(Keys.ArrowLeft)) {
       characterBox.velocity.x = -characterSpeed;
@@ -62,6 +68,12 @@ const run = async () => {
     }
  
     scene.update();
+
+    // debug
+    const newTime = performance.now();
+    characterPosition.textContent = `${Math.round(newTime - time)}`;
+    frameRate.textContent = `${characterBox.position.x},${characterBox.position.y}`;
+    time = newTime;
     requestAnimationFrame(update);
   }
 
