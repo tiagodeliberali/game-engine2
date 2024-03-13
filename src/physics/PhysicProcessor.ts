@@ -53,10 +53,13 @@ export class PhysicProcessor {
 
     }
 
+    static colided(box: RigidBoxComponent, anotherBox: RigidBoxComponent) {
+        return box.rightX >= anotherBox.leftX && box.leftX <= anotherBox.rightX
+            && box.bottomY <= anotherBox.topY && box.topY >= anotherBox.bottomY;
+    }
+
     checkColisionBetweenMovingBoxAndStaticBox(originalPosition: IVec2, movingBox: RigidBoxComponent, staticBox: RigidBoxComponent) {
-        // collision!
-        if (movingBox.rightX >= staticBox.leftX && movingBox.leftX <= staticBox.rightX
-            && movingBox.bottomY <= staticBox.topY && movingBox.topY >= staticBox.bottomY) {
+        if (PhysicProcessor.colided(movingBox, staticBox)) {
             const diff = Vec2.subtrac(movingBox.position, originalPosition);
 
             // from top

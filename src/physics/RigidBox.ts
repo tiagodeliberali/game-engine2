@@ -15,11 +15,11 @@ export class RigidBox {
         this.offset = new ReadOnlyVec2(Vec2.clone(offset));
     }
 
-    static StaticBox(size: Vec2, offset: Vec2) {
+    static StaticBox(size: IVec2, offset: IVec2) {
         return new RigidBox(size, offset, true);
     }
 
-    static MovingBox(size: Vec2, offset: Vec2) {
+    static MovingBox(size: IVec2, offset: IVec2) {
         return new RigidBox(size, offset, false);
     }
 }
