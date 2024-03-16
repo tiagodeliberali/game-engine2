@@ -39,7 +39,7 @@ export class PhysicProcessor {
 
             // check against all static entities
             for (let j = 0; j < this.staticBoxes.length; j++) {
-                this.checkColisionBetweenMovingBoxAndStaticBox(originalPosition, this.movingBoxes[i], this.staticBoxes[j]);
+                PhysicProcessor.checkColisionBetweenMovingBoxAndStaticBox(originalPosition, this.movingBoxes[i], this.staticBoxes[j]);
             }
         }
     }
@@ -54,7 +54,7 @@ export class PhysicProcessor {
             && box.bottomY <= anotherBox.topY && box.topY >= anotherBox.bottomY;
     }
 
-    checkColisionBetweenMovingBoxAndStaticBox(originalPosition: IVec2, movingBox: RigidBoxComponent, staticBox: RigidBoxComponent) {
+    static checkColisionBetweenMovingBoxAndStaticBox(originalPosition: IVec2, movingBox: RigidBoxComponent, staticBox: RigidBoxComponent) {
         if (PhysicProcessor.colided(movingBox, staticBox)) {
             const diff = Vec2.subtrac(movingBox.position, originalPosition);
 

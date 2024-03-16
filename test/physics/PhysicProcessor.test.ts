@@ -62,3 +62,67 @@ const buildRigidBoxComponent = (position: IVec2, size: IVec2, offset: IVec2) => 
 
     return component;
 }
+
+test('should resolve collision from left', () => {
+    const originalPosition = new Vec2(0, 0);
+
+    const movingBox = buildRigidBoxComponent(new Vec2(2, 2), new Vec2(10, 10), new Vec2(0, 0));
+    const staticBox = buildRigidBoxComponent(new Vec2(10, 0), new Vec2(10, 10), new Vec2(0, 0));
+    
+    movingBox.velocity = new Vec2(10, 10);
+
+    PhysicProcessor.checkColisionBetweenMovingBoxAndStaticBox(originalPosition, movingBox, staticBox);
+
+    expect(movingBox.velocity.x).toBe(0);
+    expect(movingBox.velocity.y).toBe(10);
+    expect(movingBox.position.x).toBe(staticBox.leftX - movingBox.width);
+    expect(movingBox.position.y).toBe(2);
+});
+
+test('should resolve collision from right', () => {
+    const originalPosition = new Vec2(22, 0);
+
+    const movingBox = buildRigidBoxComponent(new Vec2(18, 4), new Vec2(10, 10), new Vec2(0, 0));
+    const staticBox = buildRigidBoxComponent(new Vec2(10, 0), new Vec2(10, 10), new Vec2(0, 0));
+    
+    movingBox.velocity = new Vec2(-10, -10);
+
+    PhysicProcessor.checkColisionBetweenMovingBoxAndStaticBox(originalPosition, movingBox, staticBox);
+
+    expect(movingBox.velocity.x).toBe(0);
+    expect(movingBox.velocity.y).toBe(-10);
+    expect(movingBox.position.x).toBe(staticBox.leftX + staticBox.width);
+    expect(movingBox.position.y).toBe(4);
+});
+
+test('should resolve collision from top', () => {
+    const originalPosition = new Vec2(17, 12);
+
+    const movingBox = buildRigidBoxComponent(new Vec2(13, 8), new Vec2(10, 10), new Vec2(0, 0));
+    const staticBox = buildRigidBoxComponent(new Vec2(10, 0), new Vec2(10, 10), new Vec2(0, 0));
+    
+    movingBox.velocity = new Vec2(-10, -10);
+
+    PhysicProcessor.checkColisionBetweenMovingBoxAndStaticBox(originalPosition, movingBox, staticBox);
+
+    expect(movingBox.velocity.x).toBe(-10);
+    expect(movingBox.velocity.y).toBe(0);
+    expect(movingBox.position.x).toBe(13);
+    expect(movingBox.position.y).toBe(staticBox.topY + 1);
+});
+
+test('should resolve collision from bottom', () => {
+    const originalPosition = new Vec2(13, -12);
+
+    const movingBox = buildRigidBoxComponent(new Vec2(17, -8), new Vec2(10, 10), new Vec2(0, 0));
+    const staticBox = buildRigidBoxComponent(new Vec2(10, 0), new Vec2(10, 10), new Vec2(0, 0));
+    
+    movingBox.velocity = new Vec2(10, 10);
+
+    PhysicProcessor.checkColisionBetweenMovingBoxAndStaticBox(originalPosition, movingBox, staticBox);
+
+    expect(movingBox.velocity.x).toBe(10);
+    expect(movingBox.velocity.y).toBe(0);
+    expect(movingBox.position.x).toBe(17);
+    expect(movingBox.position.y).toBe(staticBox.bottomY - movingBox.height);
+});
