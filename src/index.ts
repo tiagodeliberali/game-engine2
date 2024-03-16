@@ -1,4 +1,4 @@
-import { AtlasBuilder } from "./graphics/Atlas";
+import { Atlas, AtlasBuilder } from "./graphics/Atlas";
 import { Keys, isKeyPressed } from "./inputs/Keyboard";
 import { Engine } from "./core/Engine";
 import { GameObject } from "./core/GameObject";
@@ -35,49 +35,60 @@ const run = async () => {
 
   scene.add([coin1, coin2, key, character])
   
-  let lastMove: string;
+
 
   let time = performance.now();
   const update = () => {
-    if (isKeyPressed(Keys.ArrowLeft)) {
-      characterBox.velocity.x = -characterSpeed;
-      characterSprite.updateSprite(atlas.getSprite("character_walk_left")!);
-      lastMove = Keys.ArrowLeft;
-    } else if (isKeyPressed(Keys.ArrowRight)) {
-      characterBox.velocity.x = characterSpeed;
-      characterSprite.updateSprite(atlas.getSprite("character_walk_right")!);
-      lastMove = Keys.ArrowRight;
-    } else {
-      characterBox.velocity.x = 0;
-      if (lastMove == Keys.ArrowLeft) {
-        characterSprite.updateSprite(atlas.getSprite("character_idle_left")!);
-        lastMove = "";
-      } else if (lastMove == Keys.ArrowRight) {
-        characterSprite.updateSprite(atlas.getSprite("character_idle_right")!);
-        lastMove = "";
-      }
-    }
+    const newTime = performance.now();
+    const delta = (newTime - time) / 1000;
 
-    if (isKeyPressed(Keys.Space)) {
-      characterBox.velocity.y = 100;  
-    }
-
-    camera[0] = Math.max(0, characterBox.leftX - 64);
-    if (characterBox.leftX < 0) {
-      characterBox.x = 0;
-    }
+    updateCheracter(characterBox, characterSpeed, characterSprite, atlas, camera);
  
     scene.update();
+    scene.fixedUpdate(delta)
 
     // debug
-    const newTime = performance.now();
-    characterPosition.textContent = `${Math.round(newTime - time)}`;
+    characterPosition.textContent = `${Math.round(delta)}`;
     frameRate.textContent = `${characterBox.position.x},${characterBox.position.y}`;
     time = newTime;
+    
     requestAnimationFrame(update);
   }
 
-  update();
+  requestAnimationFrame(update);
 };
 
 run();
+
+let lastMove: string;
+function updateCheracter(characterBox: RigidBoxComponent, characterSpeed: number, characterSprite: SpriteComponent, atlas: Atlas, camera: number[]) {
+  if (isKeyPressed(Keys.ArrowLeft)) {
+    characterBox.velocity.x = -characterSpeed;
+    characterSprite.updateSprite(atlas.getSprite("character_walk_left")!);
+    lastMove = Keys.ArrowLeft;
+  } else if (isKeyPressed(Keys.ArrowRight)) {
+    characterBox.velocity.x = characterSpeed;
+    characterSprite.updateSprite(atlas.getSprite("character_walk_right")!);
+    lastMove = Keys.ArrowRight;
+  } else {
+    characterBox.velocity.x = 0;
+    if (lastMove == Keys.ArrowLeft) {
+      characterSprite.updateSprite(atlas.getSprite("character_idle_left")!);
+      lastMove = "";
+    } else if (lastMove == Keys.ArrowRight) {
+      characterSprite.updateSprite(atlas.getSprite("character_idle_right")!);
+      lastMove = "";
+    }
+  }
+
+  if (isKeyPressed(Keys.Space)) {
+    characterBox.velocity.y = 100;
+  }
+
+  camera[0] = Math.max(0, characterBox.leftX - 64);
+  if (characterBox.leftX < 0) {
+    characterBox.x = 0;
+  }
+  return lastMove;
+}
+

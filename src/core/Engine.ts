@@ -7,6 +7,8 @@ import { PhysicProcessor } from "../physics/PhysicProcessor";
 import { RigidBoxComponent } from "../physics/RigidBox";
 import { GameObject } from "./GameObject";
 
+const fixedUpdateDelta = 1.0 / 60;
+
 export class Engine {
     private graphicProcessor: GraphicProcessor;
     private physicProcessor: PhysicProcessor;
@@ -25,14 +27,14 @@ export class Engine {
         const graphicProcessor = await GraphicProcessor.build();
         const debugGraphicProcessor = await GraphicDebugger.build();
         const engine = new Engine(graphicProcessor, new PhysicProcessor(), camera);
-        
+
         if (enableDebugtger) {
             engine.enableGraphicDebugger(debugGraphicProcessor);
         }
-        
+
         return engine;
     }
-    
+
     enableGraphicDebugger(debugGraphicProcessor: GraphicDebugger) {
         this.debugGraphicProcessor = debugGraphicProcessor;
     }
@@ -52,12 +54,12 @@ export class Engine {
     private processComponents(gameObject: GameObject) {
         for (const component of gameObject.componentsIterable) {
             if (component.typeName == SpriteComponent.Name) {
-                this.graphicProcessor.configureSpriteComponent(component as SpriteComponent);                
-            } 
+                this.graphicProcessor.configureSpriteComponent(component as SpriteComponent);
+            }
             else if (component.typeName == RigidBoxComponent.Name) {
-                this.physicProcessor.configureRigidBoxComponent(component as RigidBoxComponent);                
-                this.debugGraphicProcessor?.configureRigidBoxComponent(component as RigidBoxComponent);                
-            } 
+                this.physicProcessor.configureRigidBoxComponent(component as RigidBoxComponent);
+                this.debugGraphicProcessor?.configureRigidBoxComponent(component as RigidBoxComponent);
+            }
             else {
                 this.gameObjects.push(gameObject);
             }
@@ -67,6 +69,17 @@ export class Engine {
     public update() {
         this.graphicProcessor.draw(this.camera);
         this.debugGraphicProcessor?.draw(this.camera);
-        this.physicProcessor.update();
+    }
+
+
+    public fixedUpdate(delta: number) {
+        while (delta > fixedUpdateDelta) {
+            this.physicProcessor.fixedUpdate(fixedUpdateDelta);
+            delta -= fixedUpdateDelta;
+        }
+
+        if (delta > 0.0001) {
+            this.physicProcessor.fixedUpdate(delta);
+        }
     }
 }

@@ -25,16 +25,12 @@ export class PhysicProcessor {
         });
     }
 
-    update() {
-        const currentTime = performance.now();
-        const diff = (currentTime - this.lastTime) / 1000; // seconds
-        this.lastTime = currentTime;
-
+    fixedUpdate(delta: number) {
         for (let i = 0; i < this.movingBoxes.length; i++) {
             // check moviment
             const originalPosition = Vec2.clone(this.movingBoxes[i].position);
 
-            this.applyMoviment(this.movingBoxes[i], diff);
+            this.applyMoviment(this.movingBoxes[i], delta);
 
             // check against all moving entities
             for (let j = i + 1; j < this.movingBoxes.length; j++) {
