@@ -1,7 +1,14 @@
+import { EventHandler, OnEvent } from "../core/EventHandler";
+
 const pressedKey: Map<string, boolean> = new Map<string, boolean>();
+const onKeyDownEventHandler: Map<string, EventHandler<void>> = new Map<string, EventHandler<void>>();
 
 function onKeyDown(event: KeyboardEvent) {
     pressedKey.set(event.key, true);
+ 
+    if (onKeyDownEventHandler.has(event.key)) {
+        onKeyDownEventHandler.get(event.key)!.fire(undefined);
+    }
 }
 
 function onKeyUp(event: KeyboardEvent) {
@@ -15,6 +22,13 @@ export function initKeyboard() {
 
 export function isKeyPressed(key: string) {
     return pressedKey.get(key) || false;
+}
+
+export function subscribeOnKeyDown(key: string, action: OnEvent<void>) {
+    if (!onKeyDownEventHandler.has(key)) {
+        onKeyDownEventHandler.set(key, new EventHandler());
+    }
+    onKeyDownEventHandler.get(key)!.subscribe(action);
 }
 
 export class Keys {

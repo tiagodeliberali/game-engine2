@@ -1,5 +1,5 @@
 import { AtlasBuilder } from "./graphics/Atlas";
-import { Keys, isKeyPressed } from "./inputs/Keyboard";
+import { Keys, isKeyPressed, subscribeOnKeyDown } from "./inputs/Keyboard";
 import { Engine } from "./core/Engine";
 import { GameObject } from "./core/GameObject";
 import { SpriteComponent } from "./graphics/Sprite";
@@ -32,7 +32,9 @@ const run = async () => {
   const character = new GameObject(new Vec2(4 * 16, 9 * 16));
   const characterSprite = new SpriteComponent(atlas.getSprite("character_idle_right")!);
   const characterBox = new RigidBoxComponent(RigidBox.MovingBox(new Vec2(8, 15), new Vec2(4,0)));
+
   let lastMove: string;
+  let jump = false;
   const characterCode = new CodeComponent(() => {
     if (isKeyPressed(Keys.ArrowLeft)) {
       characterBox.velocity.x = -characterSpeed;
@@ -52,10 +54,13 @@ const run = async () => {
         lastMove = "";
       }
     }
-  
-    if (isKeyPressed(Keys.Space)) {
-      characterBox.velocity.y = 100;
-    }
+    
+    subscribeOnKeyDown(Keys.Space, () => {
+      if (!jump) {
+        characterBox.velocity.y = 200;
+        jump = true;
+      }
+    });
   
     camera[0] = Math.max(0, characterBox.leftX - 64);
     if (characterBox.leftX < 0) {
