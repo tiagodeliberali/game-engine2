@@ -12,11 +12,10 @@ const run = async () => {
   // debug
   const logger = new HtmlLogger('logElementId');
   
-
   const atlas = await AtlasBuilder.load("mario");
   const camera: Array<number> = [0, 0];
   
-  const scene = await Engine.build(true, camera);
+  const scene = await Engine.build(logger, true, camera);
   scene.loadAtlas(atlas);
 
   const coin1 = new GameObject(new Vec2(7 * 16, 4 * 16));
@@ -28,6 +27,7 @@ const run = async () => {
   const key = new GameObject(new Vec2(9 * 16, 3 * 16));
   key.add(new SpriteComponent(atlas.getSprite("key")!));
 
+  // character code
   const characterSpeed = 80;
   const character = new GameObject(new Vec2(4 * 16, 9 * 16));
   const characterSprite = new SpriteComponent(atlas.getSprite("character_idle_right")!);
@@ -69,7 +69,7 @@ const run = async () => {
   character.add(characterCode);
   
   scene.add([coin1, coin2, key, character])
-  scene.start(logger);
+  scene.start();
 };
 
 run();

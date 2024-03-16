@@ -17,23 +17,25 @@ export class Engine {
     private physicProcessor: PhysicProcessor;
     private debugGraphicProcessor: GraphicDebugger | undefined;
     private codeProcessor: CodeProcessor | undefined;
+    private logger: HtmlLogger;
     private gameObjects: GameObject[] = [];
     private camera: Array<number>;
 
-    private constructor(graphicProcessor: GraphicProcessor, physicProcessor: PhysicProcessor, codeProcessor: CodeProcessor, camera: Array<number>) {
+    private constructor(graphicProcessor: GraphicProcessor, physicProcessor: PhysicProcessor, codeProcessor: CodeProcessor, logger: HtmlLogger, camera: Array<number>) {
         this.graphicProcessor = graphicProcessor;
         this.physicProcessor = physicProcessor;
         this.codeProcessor = codeProcessor;
+        this.logger = logger;
         this.camera = camera;
         initKeyboard();
     }
 
-    static async build(enableDebugtger: boolean, camera: Array<number>) {
+    static async build(logger: HtmlLogger, enableDebugger: boolean, camera: Array<number>) {
         const graphicProcessor = await GraphicProcessor.build();
         const debugGraphicProcessor = await GraphicDebugger.build();
-        const engine = new Engine(graphicProcessor, new PhysicProcessor(), new CodeProcessor(), camera);
+        const engine = new Engine(graphicProcessor, new PhysicProcessor(), new CodeProcessor(), logger, camera);
 
-        if (enableDebugtger) {
+        if (enableDebugger) {
             engine.enableGraphicDebugger(debugGraphicProcessor);
         }
 
@@ -94,7 +96,7 @@ export class Engine {
         }
     }
 
-    start(logger: HtmlLogger) {
+    start() {
         let time = performance.now();
         const update = () => {
             const newTime = performance.now();
@@ -105,7 +107,7 @@ export class Engine {
             this.fixedUpdate(delta)
 
             // debug
-            logger.set("delta", `${Math.round(delta)}`);
+            this.logger.set("delta", `${Math.round(delta)}`);
             
 
             requestAnimationFrame(update);
