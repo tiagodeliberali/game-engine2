@@ -6,6 +6,9 @@ import { SpriteComponent } from "../graphics/Sprite";
 import { PhysicProcessor } from "../physics/PhysicProcessor";
 import { RigidBoxComponent } from "../physics/RigidBox";
 import { GameObject } from "./GameObject";
+import { CodeProcessor } from "../code/CodeProcessor";
+import { CodeComponent } from "../code/CodeComponent";
+import { HtmlLogger } from "../debug/HtmlLogger";
 
 const fixedUpdateDelta = 1.0 / 60;
 
@@ -13,20 +16,22 @@ export class Engine {
     private graphicProcessor: GraphicProcessor;
     private physicProcessor: PhysicProcessor;
     private debugGraphicProcessor: GraphicDebugger | undefined;
+    private codeProcessor: CodeProcessor | undefined;
     private gameObjects: GameObject[] = [];
     private camera: Array<number>;
 
-    private constructor(graphicProcessor: GraphicProcessor, physicProcessor: PhysicProcessor, camera: Array<number>) {
+    private constructor(graphicProcessor: GraphicProcessor, physicProcessor: PhysicProcessor, codeProcessor: CodeProcessor, camera: Array<number>) {
         this.graphicProcessor = graphicProcessor;
         this.physicProcessor = physicProcessor;
+        this.codeProcessor = codeProcessor;
         this.camera = camera;
         initKeyboard();
     }
 
-    public static async build(enableDebugtger: boolean, camera: Array<number>) {
+    static async build(enableDebugtger: boolean, camera: Array<number>) {
         const graphicProcessor = await GraphicProcessor.build();
         const debugGraphicProcessor = await GraphicDebugger.build();
-        const engine = new Engine(graphicProcessor, new PhysicProcessor(), camera);
+        const engine = new Engine(graphicProcessor, new PhysicProcessor(), new CodeProcessor(), camera);
 
         if (enableDebugtger) {
             engine.enableGraphicDebugger(debugGraphicProcessor);
@@ -39,13 +44,13 @@ export class Engine {
         this.debugGraphicProcessor = debugGraphicProcessor;
     }
 
-    public loadAtlas(atlasData: Atlas) {
+    loadAtlas(atlasData: Atlas) {
         this.graphicProcessor.loadAtlas(atlasData);
         this.physicProcessor.loadAtlas(atlasData);
         this.debugGraphicProcessor?.loadAtlas(atlasData);
     }
 
-    public add(gameObjects: GameObject[]) {
+    add(gameObjects: GameObject[]) {
         for (const gameObject of gameObjects) {
             this.processComponents(gameObject);
         }
@@ -60,26 +65,52 @@ export class Engine {
                 this.physicProcessor.configureRigidBoxComponent(component as RigidBoxComponent);
                 this.debugGraphicProcessor?.configureRigidBoxComponent(component as RigidBoxComponent);
             }
+            else if (component.typeName == CodeComponent.Name) {
+                this.codeProcessor?.configureCodeComponent(component as CodeComponent);
+            }
             else {
                 this.gameObjects.push(gameObject);
             }
         }
     }
 
-    public update() {
+    update(delta: number) {
         this.graphicProcessor.draw(this.camera);
         this.debugGraphicProcessor?.draw(this.camera);
+        this.codeProcessor?.update(delta);
     }
 
 
-    public fixedUpdate(delta: number) {
+    fixedUpdate(delta: number) {
         while (delta > fixedUpdateDelta) {
             this.physicProcessor.fixedUpdate(fixedUpdateDelta);
+            this.codeProcessor?.update(fixedUpdateDelta);
             delta -= fixedUpdateDelta;
         }
 
         if (delta > 0.0001) {
             this.physicProcessor.fixedUpdate(delta);
+            this.codeProcessor?.update(delta);
         }
+    }
+
+    start(logger: HtmlLogger) {
+        let time = performance.now();
+        const update = () => {
+            const newTime = performance.now();
+            const delta = (newTime - time) / 1000;
+            time = newTime;
+
+            this.update(delta);
+            this.fixedUpdate(delta)
+
+            // debug
+            logger.set("delta", `${Math.round(delta)}`);
+            
+
+            requestAnimationFrame(update);
+        }
+
+        requestAnimationFrame(update);
     }
 }
