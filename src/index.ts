@@ -5,11 +5,12 @@ import { GameObject } from "./core/GameObject";
 import { SpriteComponent } from "./graphics/Sprite";
 import { Vec2 } from "./core/Math";
 import { RigidBox, RigidBoxComponent } from "./physics/RigidBox";
+import { HtmlLogger } from "./debug/HtmlLogger";
 
 const run = async () => {
   // debug
-  const frameRate = document.querySelector<HTMLSpanElement>("#frameRate")!;
-  const characterPosition = document.querySelector<HTMLSpanElement>("#characterPosition")!;
+  const logger = new HtmlLogger('logElementId');
+  
 
   const atlas = await AtlasBuilder.load("mario");
   const camera: Array<number> = [0, 0];
@@ -48,8 +49,8 @@ const run = async () => {
     scene.fixedUpdate(delta)
 
     // debug
-    characterPosition.textContent = `${Math.round(delta)}`;
-    frameRate.textContent = `${characterBox.position.x},${characterBox.position.y}`;
+    logger.set("delta", `${Math.round(delta)}`);
+    logger.set("character position", `${characterBox.position.x},${characterBox.position.y}`);
     time = newTime;
     
     requestAnimationFrame(update);

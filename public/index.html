@@ -1,35 +1,48 @@
 <!doctype html>
 <html lang="en">
-<style>
-  canvas {
-    border: 1px solid #ccc;
-  }
-</style>
 
 <head>
   <meta charset="utf-8" />
   <title>
     <%= htmlWebpackPlugin.options.title %>
   </title>
+  <style>
+    body {
+      display: flex;
+      justify-content: left;
+      align-items: center;
+    }
+
+    #container {
+      display: flex;
+      flex-direction: row;
+    }
+
+    #canvas {
+      border: 1px solid #ccc;
+      width: 960px;
+      height: 640px;
+      image-rendering: crisp-edges; /* for firefox */
+      image-rendering: pixelated;   /* for everything else */
+    }
+
+    #logElementId {
+      background-color: #f2f2f2;
+      flex-grow: 1;
+      padding: 20px;
+      width: 480px; /* half of the canvas width */
+    }
+  </style>
 </head>
 
 <body>
   <noscript>You need to enable JavaScript to run this app.</noscript>
-  <canvas id="canvas" width="240" height="160" style="
-        width: 960px;
-        height: 640px;
-        image-rendering: crisp-edges; /* for firefox */
-        image-rendering: pixelated;   /* for everything else */
-    ">
-    Your browser does not support the HTML5 canvas.
-  </canvas>
-  <div style="margin-top: 20px;">
-    Debug info
-    <div>
-      Frame rate: <span id="frameRate"></span>
-    </div>
-    <div>
-      Character position: <span id="characterPosition"></span>
+  <div id="container">
+    <canvas id="canvas" width="240" height="160">
+      Your browser does not support the HTML5 canvas.
+    </canvas>
+    <div id="logElementId">
+      <!-- Your log component content goes here -->
     </div>
   </div>
 </body>
