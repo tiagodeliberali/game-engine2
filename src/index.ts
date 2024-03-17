@@ -7,6 +7,7 @@ import { Vec2 } from "./core/Math";
 import { RigidBox, RigidBoxComponent, removeWhenTouch } from "./physics/RigidBox";
 import { HtmlLogger } from "./debug/HtmlLogger";
 import { CodeComponent } from "./code/CodeComponent";
+import { Queue } from "./core/Queue";
 
 const run = async () => {
   // debug
@@ -41,7 +42,7 @@ const run = async () => {
 
   let lastMove: string;
   let jump = 2;
-  
+
   let collectedCoins = 0;
   characterBox.onCollision = (tag: string) => {
     if (tag == "Ground" || tag == "Blocks" || tag == "Bridge") {
@@ -57,34 +58,72 @@ const run = async () => {
 
   const characterCode = new CodeComponent();
 
-  characterCode.initAction = () => {
-    subscribeOnKeyDown(Keys.Space, () => {
-      if (jump > 0) {
-        characterBox.velocity.y = 200;
-        jump--;
-        logger.set("jump key down", `${jump}`);
-      }
-    });
+  enum Action {
+    WalkRight,
+    WalkLeft,
+    Jump,
+    Idle
   }
 
-  characterCode.updateAction = () => {
+  const queue = new Queue<Action>();
+
+  const keyboadrInput = new GameObject(new Vec2(0, 0));
+  const keyboardCode = new CodeComponent();
+  keyboadrInput.add(keyboardCode);
+
+  keyboardCode.updateAction = () => {
     if (isKeyPressed(Keys.ArrowLeft)) {
-      characterBox.velocity.x = -characterSpeed;
-      characterSprite.updateSprite(atlas.getSprite("character_walk_left")!);
-      lastMove = Keys.ArrowLeft;
-    } else if (isKeyPressed(Keys.ArrowRight)) {
-      characterBox.velocity.x = characterSpeed;
-      characterSprite.updateSprite(atlas.getSprite("character_walk_right")!);
-      lastMove = Keys.ArrowRight;
-    } else {
-      characterBox.velocity.x = 0;
-      if (lastMove == Keys.ArrowLeft) {
-        characterSprite.updateSprite(atlas.getSprite("character_idle_left")!);
-        lastMove = "";
-      } else if (lastMove == Keys.ArrowRight) {
-        characterSprite.updateSprite(atlas.getSprite("character_idle_right")!);
-        lastMove = "";
-      }
+      queue.enqueue(Action.WalkLeft);
+    }
+    else if (isKeyPressed(Keys.ArrowRight)) {
+      queue.enqueue(Action.WalkRight);
+    }
+    else {
+      queue.enqueue(Action.Idle);
+    }
+  };
+
+  keyboardCode.initAction = () => {
+    subscribeOnKeyDown(Keys.Space, () => {
+      queue.enqueue(Action.Jump);
+    });
+};
+
+  characterCode.updateAction = () => {
+    const action = queue.dequeue();
+
+    if (action == undefined) {
+      return;
+    }
+
+    switch (action) {
+      case Action.WalkRight:
+        characterBox.velocity.x = characterSpeed;
+        characterSprite.updateSprite(atlas.getSprite("character_walk_right")!);
+        lastMove = Keys.ArrowRight;
+        break;
+      case Action.WalkLeft:
+        characterBox.velocity.x = -characterSpeed;
+        characterSprite.updateSprite(atlas.getSprite("character_walk_left")!);
+        lastMove = Keys.ArrowLeft;
+        break;
+      case Action.Jump:
+        if (jump > 0) {
+          characterBox.velocity.y = 200;
+          jump--;
+          logger.set("jump key down", `${jump}`);
+        }
+        break;
+      default:
+        characterBox.velocity.x = 0;
+        if (lastMove == Keys.ArrowLeft) {
+          characterSprite.updateSprite(atlas.getSprite("character_idle_left")!);
+          lastMove = "";
+        } else if (lastMove == Keys.ArrowRight) {
+          characterSprite.updateSprite(atlas.getSprite("character_idle_right")!);
+          lastMove = "";
+        }
+        break;
     }
 
     camera[0] = Math.max(0, characterBox.leftX - 64);
@@ -99,7 +138,7 @@ const run = async () => {
   character.add(characterBox)
   character.add(characterCode);
 
-  scene.add([coin1, coin2, key, character])
+  scene.add([coin1, coin2, key, character, keyboadrInput])
   scene.start();
 };
 
