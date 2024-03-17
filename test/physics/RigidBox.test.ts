@@ -5,7 +5,7 @@ import { RigidBox, RigidBoxComponent } from "../../src/physics/RigidBox";
 test('RigidBox should not share references with input Vec2', () => {
     const vec = new Vec2(2, 4);
 
-    const rigidBox = RigidBox.StaticBox(vec, vec);
+    const rigidBox = RigidBox.StaticBox("test", vec, vec);
     vec.x = 10;
     vec.y = 20;
 
@@ -17,13 +17,13 @@ test('RigidBox should not share references with input Vec2', () => {
 });
 
 test('Static rigid box should be marked as static', () => {
-    const rigidBox = RigidBox.StaticBox(Vec2.zero(), Vec2.zero());
+    const rigidBox = RigidBox.StaticBox("test", Vec2.zero(), Vec2.zero());
 
     expect(rigidBox.isStatic).toBeTruthy();
 });
 
 test('Moving rigid box should NOT be marked as static', () => {
-    const rigidBox = RigidBox.MovingBox(Vec2.zero(), Vec2.zero());
+    const rigidBox = RigidBox.MovingBox("test", Vec2.zero(), Vec2.zero());
 
     expect(rigidBox.isStatic).toBeFalsy();
 });
@@ -41,7 +41,7 @@ test('Moving rigid box should NOT be marked as static', () => {
 test('RigidBox component get correct position values', () => {
     // arrange
     const gameObject = new GameObject(new Vec2(40, 20));
-    const box = RigidBox.MovingBox(new Vec2(7, 6), new Vec2(3, 2));
+    const box = RigidBox.MovingBox("test", new Vec2(7, 6), new Vec2(3, 2));
 
     // act
     const component = new RigidBoxComponent(box);
@@ -66,7 +66,7 @@ test('RigidBox component get correct position values', () => {
 test('Move game object should move component', () => {
     // arrange
     const gameObject = new GameObject(new Vec2(40, 20));
-    const box = RigidBox.MovingBox(new Vec2(7, 6), new Vec2(3, 2));
+    const box = RigidBox.MovingBox("test", new Vec2(7, 6), new Vec2(3, 2));
 
     const component = new RigidBoxComponent(box);
     component.setReferece(gameObject);
@@ -91,7 +91,7 @@ test('Move game object should move component', () => {
 test('Update position should update all values', () => {
     // arrange
     const gameObject = new GameObject(new Vec2(40, 20));
-    const box = RigidBox.MovingBox(new Vec2(7, 6), new Vec2(3, 2));
+    const box = RigidBox.MovingBox("test", new Vec2(7, 6), new Vec2(3, 2));
 
     const component = new RigidBoxComponent(box);
     component.setReferece(gameObject);
@@ -116,7 +116,7 @@ test('Update position should update all values', () => {
 test('Update x and y should update all values', () => {
     // arrange
     const gameObject = new GameObject(new Vec2(40, 20));
-    const box = RigidBox.MovingBox(new Vec2(7, 6), new Vec2(3, 2));
+    const box = RigidBox.MovingBox("test", new Vec2(7, 6), new Vec2(3, 2));
 
     const component = new RigidBoxComponent(box);
     component.setReferece(gameObject);
@@ -141,7 +141,7 @@ test('Update x and y should update all values', () => {
 
 
 test('Component name should be correctly set', () => {
-    const component = new RigidBoxComponent(RigidBox.MovingBox(Vec2.zero(), Vec2.zero()));
+    const component = new RigidBoxComponent(RigidBox.MovingBox("test", Vec2.zero(), Vec2.zero()));
 
     expect(component.typeName).toBe(RigidBoxComponent.Name);
 });
