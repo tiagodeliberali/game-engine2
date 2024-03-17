@@ -41,12 +41,11 @@ const run = async () => {
 
   let lastMove: string;
   let jump = 2;
-  logger.set("jump key down", `${jump}`);
-
-
+  
   let collectedCoins = 0;
   characterBox.onCollision = (tag: string) => {
     if (tag == "Ground" || tag == "Blocks" || tag == "Bridge") {
+      logger.set("jump key down", `${jump}`);
       jump = 2;
     }
 
@@ -90,6 +89,7 @@ const run = async () => {
       if (jump > 0) {
         characterBox.velocity.y = 200;
         jump--;
+        logger.set("jump key down", `${jump}`);
       }
     });
   }
