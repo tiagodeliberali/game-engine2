@@ -27,7 +27,6 @@ export class Engine {
         this.codeProcessor = codeProcessor;
         this.logger = logger;
         this.camera = camera;
-        initKeyboard();
     }
 
     static async build(logger: HtmlLogger, enableDebugger: boolean, camera: Array<number>) {
@@ -76,6 +75,11 @@ export class Engine {
         }
     }
 
+    init() {
+        initKeyboard();
+        this.codeProcessor?.init();
+    }
+
     update(delta: number) {
         this.graphicProcessor.draw(this.camera);
         this.debugGraphicProcessor?.draw(this.camera);
@@ -97,7 +101,10 @@ export class Engine {
     }
 
     start() {
+        this.init();
+        
         let time = performance.now();
+        
         const update = () => {
             const newTime = performance.now();
             const delta = (newTime - time) / 1000;

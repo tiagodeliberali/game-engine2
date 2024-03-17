@@ -6,8 +6,8 @@ const onKeyDownEventHandler: Map<string, EventHandler<void>> = new Map<string, E
 function onKeyDown(event: KeyboardEvent) {
     pressedKey.set(event.key, true);
  
-    if (onKeyDownEventHandler.has(event.key)) {
-        onKeyDownEventHandler.get(event.key)!.fire(undefined);
+    if (!event.repeat && onKeyDownEventHandler.has(event.key)) {
+        onKeyDownEventHandler.get(event.key)!.fire();
     }
 }
 

@@ -1,6 +1,7 @@
 import { CodeComponent } from "./CodeComponent";
 
 export class CodeProcessor {
+    private initComponents: Array<CodeComponent> = new Array<CodeComponent>();
     private updateComponents: Array<CodeComponent> = new Array<CodeComponent>();
     private fixedUpdateComponents: Array<CodeComponent> = new Array<CodeComponent>();
 
@@ -10,6 +11,15 @@ export class CodeProcessor {
         }
         if (codeComponent.fixedUpdateAction) {
             this.fixedUpdateComponents.push(codeComponent);
+        }
+        if (codeComponent.initAction) {
+            this.initComponents.push(codeComponent);
+        }
+    }
+
+    init() {
+        for (let i = 0; i < this.initComponents.length; i++) {
+            this.initComponents[i].init();
         }
     }
 

@@ -8,11 +8,10 @@ export class CodeComponent extends Component {
     
     updateAction: ((delta: number) => void) | null = null;
     fixedUpdateAction: ((delta: number) => void) | null = null;
+    initAction: (() => void) | null = null;
 
-    constructor(updateAction?: (delta: number) => void, fixedUpdateAction?: (delta: number) => void) {
+    constructor() {
         super();
-        this.updateAction = updateAction || null;
-        this.fixedUpdateAction = fixedUpdateAction || null;
     }
 
     setReferece(gameObject: GameObject): void {
@@ -21,6 +20,12 @@ export class CodeComponent extends Component {
 
     get typeName(): string {
         return CodeComponent.Name;
+    }
+
+    init() {
+        if (this.initAction) {
+            this.initAction();
+        }
     }
 
     update(delta: number): void {

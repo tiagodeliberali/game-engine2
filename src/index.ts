@@ -11,21 +11,21 @@ import { CodeComponent } from "./code/CodeComponent";
 const run = async () => {
   // debug
   const logger = new HtmlLogger('logElementId');
-  
+
   const atlas = await AtlasBuilder.load("mario");
   const camera: Array<number> = [0, 0];
-  
+
   const scene = await Engine.build(logger, true, camera);
   scene.loadAtlas(atlas);
 
   const coin1 = new GameObject(new Vec2(7 * 16, 4 * 16));
-  const coin1Box = new RigidBoxComponent(RigidBox.StaticArea("coin", new Vec2(8, 15), new Vec2(4,0)));
+  const coin1Box = new RigidBoxComponent(RigidBox.StaticArea("coin", new Vec2(8, 15), new Vec2(4, 0)));
   coin1Box.onCollision = removeWhenTouch("player", coin1);
   coin1.add(new SpriteComponent(atlas.getSprite("coin_spinning")!));
   coin1.add(coin1Box);
 
   const coin2 = new GameObject(new Vec2(7 * 16, 5 * 16));
-  const coin2Box = new RigidBoxComponent(RigidBox.StaticArea("coin", new Vec2(8, 15), new Vec2(4,0)));
+  const coin2Box = new RigidBoxComponent(RigidBox.StaticArea("coin", new Vec2(8, 15), new Vec2(4, 0)));
   coin2Box.onCollision = removeWhenTouch("player", coin2);
   coin2.add(new SpriteComponent(atlas.getSprite("coin_spinning")!));
   coin2.add(coin2Box);
@@ -37,15 +37,17 @@ const run = async () => {
   const characterSpeed = 80;
   const character = new GameObject(new Vec2(4 * 16, 9 * 16));
   const characterSprite = new SpriteComponent(atlas.getSprite("character_idle_right")!);
-  const characterBox = new RigidBoxComponent(RigidBox.MovingBox("player", new Vec2(8, 15), new Vec2(4,0)));
+  const characterBox = new RigidBoxComponent(RigidBox.MovingBox("player", new Vec2(8, 15), new Vec2(4, 0)));
 
   let lastMove: string;
-  let jump = false;
+  let jump = 2;
+  logger.set("jump key down", `${jump}`);
+
 
   let collectedCoins = 0;
   characterBox.onCollision = (tag: string) => {
     if (tag == "Ground" || tag == "Blocks" || tag == "Bridge") {
-      jump = false;
+      jump = 2;
     }
 
     if (tag == "coin") {
@@ -54,7 +56,8 @@ const run = async () => {
     }
   };
 
-  const characterCode = new CodeComponent(() => {
+  const characterCode = new CodeComponent();
+  characterCode.updateAction = () => {
     if (isKeyPressed(Keys.ArrowLeft)) {
       characterBox.velocity.x = -characterSpeed;
       characterSprite.updateSprite(atlas.getSprite("character_walk_left")!);
@@ -73,25 +76,28 @@ const run = async () => {
         lastMove = "";
       }
     }
-    
-    subscribeOnKeyDown(Keys.Space, () => {
-      if (!jump) {
-        characterBox.velocity.y = 200;
-        jump = true;
-      }
-    });
-  
+
     camera[0] = Math.max(0, characterBox.leftX - 64);
     if (characterBox.leftX < 0) {
       characterBox.x = 0;
     }
 
     logger.set("character position", `${characterBox.position.x},${characterBox.position.y}`);
-  })
+  };
+
+  characterCode.initAction = () => {
+    subscribeOnKeyDown(Keys.Space, () => {
+      if (jump > 0) {
+        characterBox.velocity.y = 200;
+        jump--;
+      }
+    });
+  }
+
   character.add(characterSprite);
   character.add(characterBox)
   character.add(characterCode);
-  
+
   scene.add([coin1, coin2, key, character])
   scene.start();
 };
