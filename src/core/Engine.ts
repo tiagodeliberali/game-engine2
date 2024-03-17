@@ -18,7 +18,6 @@ export class Engine {
     private debugGraphicProcessor: GraphicDebugger | undefined;
     private codeProcessor: CodeProcessor | undefined;
     private logger: HtmlLogger;
-    private gameObjects: GameObject[] = [];
     private camera: Array<number>;
 
     private constructor(graphicProcessor: GraphicProcessor, physicProcessor: PhysicProcessor, codeProcessor: CodeProcessor, logger: HtmlLogger, camera: Array<number>) {
@@ -70,7 +69,7 @@ export class Engine {
                 this.codeProcessor?.configureCodeComponent(component as CodeComponent);
             }
             else {
-                this.gameObjects.push(gameObject);
+                throw new Error(`Unknown component type: ${component.typeName}`);
             }
         }
     }
