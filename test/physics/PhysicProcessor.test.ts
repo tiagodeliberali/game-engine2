@@ -56,7 +56,7 @@ test('colision should consider rigid box edges left/right', () => {
 
 const buildRigidBoxComponent = (position: IVec2, size: IVec2, offset: IVec2) => {
     const gameObject = new GameObject(position);
-    const box = RigidBox.MovingBox(size, offset);
+    const box = RigidBox.MovingBox("test", size, offset);
     const component = new RigidBoxComponent(box);
     component.setReferece(gameObject);
 
