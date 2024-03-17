@@ -4,7 +4,7 @@ import { Engine } from "./core/Engine";
 import { GameObject } from "./core/GameObject";
 import { SpriteComponent } from "./graphics/Sprite";
 import { Vec2 } from "./core/Math";
-import { RigidBox, RigidBoxComponent } from "./physics/RigidBox";
+import { RigidBox, RigidBoxComponent, removeWhenTouch } from "./physics/RigidBox";
 import { HtmlLogger } from "./debug/HtmlLogger";
 import { CodeComponent } from "./code/CodeComponent";
 
@@ -19,10 +19,16 @@ const run = async () => {
   scene.loadAtlas(atlas);
 
   const coin1 = new GameObject(new Vec2(7 * 16, 4 * 16));
+  const coin1Box = new RigidBoxComponent(RigidBox.StaticArea("coin", new Vec2(8, 15), new Vec2(4,0)));
+  coin1Box.onCollision = removeWhenTouch("player", coin1);
   coin1.add(new SpriteComponent(atlas.getSprite("coin_spinning")!));
+  coin1.add(coin1Box);
 
   const coin2 = new GameObject(new Vec2(7 * 16, 5 * 16));
+  const coin2Box = new RigidBoxComponent(RigidBox.StaticArea("coin", new Vec2(8, 15), new Vec2(4,0)));
+  coin2Box.onCollision = removeWhenTouch("player", coin2);
   coin2.add(new SpriteComponent(atlas.getSprite("coin_spinning")!));
+  coin2.add(coin2Box);
 
   const key = new GameObject(new Vec2(9 * 16, 3 * 16));
   key.add(new SpriteComponent(atlas.getSprite("key")!));
@@ -36,9 +42,15 @@ const run = async () => {
   let lastMove: string;
   let jump = false;
 
+  let collectedCoins = 0;
   characterBox.onCollision = (tag: string) => {
     if (tag == "Ground" || tag == "Blocks" || tag == "Bridge") {
       jump = false;
+    }
+
+    if (tag == "coin") {
+      collectedCoins++;
+      logger.set("coin", `${collectedCoins}`);
     }
   };
 

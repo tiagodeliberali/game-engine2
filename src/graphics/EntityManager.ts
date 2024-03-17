@@ -32,7 +32,7 @@ export class GraphicEntityManager<Type extends IEntityType> {
     this.pendingChange = new Map<string, InternalEntityData>();
   }
 
-  public set(id: string, data: Type) {
+  set(id: string, data: Type) {
     if (this.entities.has(id)) {
       const internalData = this.entities.get(id)!;
       internalData.data = data;
@@ -43,7 +43,11 @@ export class GraphicEntityManager<Type extends IEntityType> {
     }
   }
 
-  public update(id: string, updateFunction: (data: Type) => void) {
+  remove(id: string) {
+    this.entities.delete(id);
+  }
+
+  update(id: string, updateFunction: (data: Type) => void) {
     const internalData = this.entities.get(id);
 
     if (internalData != undefined) {
@@ -54,7 +58,7 @@ export class GraphicEntityManager<Type extends IEntityType> {
     }
   }
 
-  public build(): Float32Array {
+  build(): Float32Array {
     if (this.entities.size == 0) {
       return new Float32Array();
     }
@@ -75,7 +79,7 @@ export class GraphicEntityManager<Type extends IEntityType> {
     return transformBuffer;
   }
 
-  public diff(): GraphicEntityDiff {
+  diff(): GraphicEntityDiff {
     if (this.lastSize != this.entities.size) {
       const transformBuffer = this.build();
       return GraphicEntityDiff.Full(transformBuffer);
@@ -90,7 +94,7 @@ export class GraphicEntityManager<Type extends IEntityType> {
     return diff;
   }
 
-  public numberOfEntities() {
+  numberOfEntities() {
     return this.entities.size;
   }
 }

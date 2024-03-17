@@ -6,6 +6,7 @@ let id = 1;
 
 export class GameObject {
     private onChangePosition: EventHandler<void> = new EventHandler<void>();
+    private onDestroy: EventHandler<void> = new EventHandler<void>();
     private readonly components: Array<Component>
     private readonly _position: Vec2;
     private readonly _readOnlyPosition: ReadOnlyVec2;
@@ -41,8 +42,16 @@ export class GameObject {
         this.onChangePosition.subscribe(action);
     }
 
+    subscribeOnDestroy(action: OnEvent<void>) {
+        this.onDestroy.subscribe(action);
+    }
+
     add(component: Component) {
         component.setReferece(this);
         this.components.push(component);
+    }
+
+    destroy() {
+        this.onDestroy.fire();
     }
 }

@@ -49,6 +49,7 @@ export class SpriteComponent extends Component {
   setReferece(gameObject: GameObject): void {
     this.gameObject = gameObject;
     this.gameObject.subscribeOnChangePosition(() => this.updateEntityManagerData());
+    this.gameObject.subscribeOnDestroy(() => this.destroyOnEntityManagerData());
   }
 
   setManager(entityManager: GraphicEntityManager<EntityData>) {
@@ -59,6 +60,12 @@ export class SpriteComponent extends Component {
     if (this.gameObject != undefined) {
       this.entityData.position.update(this.gameObject.position)
       this.entityManager?.set(this.gameObject.id, this.entityData);
+    }
+  }
+
+  destroyOnEntityManagerData() {
+    if (this.gameObject != undefined) {
+      this.entityManager?.remove(this.gameObject.id);
     }
   }
 

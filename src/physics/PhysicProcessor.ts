@@ -26,7 +26,15 @@ export class PhysicProcessor {
     }
 
     fixedUpdate(delta: number) {
+        const movingBoxToRemove = new Set<number>();
+        const staticBoxToRemove = new Set<number>();
+
         for (let i = 0; i < this.movingBoxes.length; i++) {
+            if (this.movingBoxes[i].isDestroyed) {
+                movingBoxToRemove.add(this.movingBoxes[i].id);
+                continue;
+            }
+
             // check moviment
             const originalPosition = Vec2.clone(this.movingBoxes[i].position);
 
@@ -39,8 +47,20 @@ export class PhysicProcessor {
 
             // check against all static entities
             for (let j = 0; j < this.staticBoxes.length; j++) {
+                if (this.staticBoxes[j].isDestroyed) {
+                    staticBoxToRemove.add(this.staticBoxes[j].id);
+                    continue;
+                }
                 PhysicProcessor.checkColisionBetweenMovingBoxAndStaticBox(originalPosition, this.movingBoxes[i], this.staticBoxes[j]);
             }
+        }
+
+        if (movingBoxToRemove.size > 0) {
+            this.movingBoxes = this.movingBoxes.filter(x => !movingBoxToRemove.has(x.id));
+        }
+
+        if (staticBoxToRemove.size > 0) {
+            this.staticBoxes = this.staticBoxes.filter(x => !staticBoxToRemove.has(x.id));
         }
     }
 
@@ -57,6 +77,11 @@ export class PhysicProcessor {
     static checkColisionBetweenMovingBoxAndStaticBox(originalPosition: IVec2, movingBox: RigidBoxComponent, staticBox: RigidBoxComponent) {
         if (PhysicProcessor.colided(movingBox, staticBox)) {
             movingBox.collidedWith(staticBox.tag);
+
+            if (!staticBox.isSolid) {
+                staticBox.collidedWith(movingBox.tag);
+                return;
+            }
 
             const diff = Vec2.subtrac(movingBox.position, originalPosition);
 

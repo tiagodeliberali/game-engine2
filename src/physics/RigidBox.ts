@@ -1,34 +1,50 @@
 import { Component } from "../core/Component";
-import { OnEvent } from "../core/EventHandler";
 import { GameObject } from "../core/GameObject";
 import { IVec2, ReadOnlyVec2, Vec2 } from "../core/Math";
 import { GraphicEntityManager } from "../graphics/EntityManager";
 import { DebugData } from "../graphics/GraphicDebugger";
 
+export const removeWhenTouch = (referenceTag: string, gameObjectReference: GameObject): ((tag: string) => void) => {
+        return (tag: string) => {
+            if (tag == referenceTag) {
+                gameObjectReference.destroy();
+            }
+        }
+}
 export class RigidBox {
     readonly isStatic: boolean;
+    readonly isSolid: boolean;
     readonly offset: ReadOnlyVec2;
     readonly size: ReadOnlyVec2;
     readonly tag: string;
+    onCollision: ((gameObjectReference: GameObject | undefined) => (tag: string) => void) | undefined;
 
-    private constructor(tag: string, size: IVec2, offset: IVec2, isStatic: boolean) {
+    private constructor(tag: string, size: IVec2, offset: IVec2, isStatic: boolean, isSolid: boolean) {
         this.isStatic = isStatic;
+        this.isSolid = isSolid;
         this.tag = tag;
         this.size = new ReadOnlyVec2(Vec2.clone(size));
         this.offset = new ReadOnlyVec2(Vec2.clone(offset));
     }
 
     static StaticBox(tag: string, size: IVec2, offset: IVec2) {
-        return new RigidBox(tag, size, offset, true);
+        return new RigidBox(tag, size, offset, true, true);
+    }
+
+    static StaticArea(tag: string, size: IVec2, offset: IVec2) {
+        const box = new RigidBox(tag, size, offset, true, false);
+        return box;
     }
 
     static MovingBox(tag: string, size: IVec2, offset: IVec2) {
-        return new RigidBox(tag, size, offset, false);
+        return new RigidBox(tag, size, offset, false, true);
     }
 }
 
+let id = 1;
 export class RigidBoxComponent extends Component {
     public static readonly Name: string = "RigidBoxComponent";
+    id: number = id++;
     private _gameObject: GameObject | undefined;
     private box: RigidBox;
     private bottomLeft: Vec2;
@@ -37,10 +53,15 @@ export class RigidBoxComponent extends Component {
     private entityManager: GraphicEntityManager<DebugData> | undefined;
     velocity: Vec2;
     aceleration: Vec2;
-    onCollision: (tag: string) => void | undefined;
+    onCollision: ((tag: string) => void) | undefined;
+    isDestroyed: boolean = false;
 
     get isStatic() {
         return this.box.isStatic;
+    }
+
+    get isSolid() {
+        return this.box.isSolid;
     }
 
     get bottomY(): number {
@@ -104,10 +125,11 @@ export class RigidBoxComponent extends Component {
     setReferece(gameObject: GameObject): void {
         this._gameObject = gameObject;
         this._gameObject.subscribeOnChangePosition(() => this.updateGameObjectPosition());
+        this._gameObject.subscribeOnDestroy(() => this.destroy());
         this.updateGameObjectPosition();
     }
 
-    collidedWith(tag: string){ 
+    collidedWith(tag: string) {
         this.onCollision && this.onCollision(tag);
     }
 
@@ -121,6 +143,16 @@ export class RigidBoxComponent extends Component {
 
         this.bottomLeft = Vec2.sum(this.box.offset, this.position);
         this.topRight = Vec2.sum(Vec2.sum(this.box.offset, this.box.size), this.position);
+    }
+
+    private destroy() {
+        this.onCollision = undefined;
+        this.isDestroyed = true;
+
+        if (this._gameObject != undefined) {
+
+            this.entityManager?.remove(this._gameObject.id);
+        }
     }
 
     setDebuggerManager(entityManager: GraphicEntityManager<DebugData>) {
