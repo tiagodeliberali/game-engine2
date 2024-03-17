@@ -19,8 +19,8 @@ export class PhysicProcessor {
 
     loadAtlas(atlas: Atlas) {
         atlas.rigidBoxes.forEach((boxPosition) => {
-            const component = new RigidBoxComponent(RigidBox.StaticBox(new Vec2(atlas.tileSize, atlas.tileSize), Vec2.zero()));
-            component.setReferece(new GameObject(boxPosition));
+            const component = new RigidBoxComponent(RigidBox.StaticBox(boxPosition.tag, new Vec2(atlas.tileSize, atlas.tileSize), Vec2.zero()));
+            component.setReferece(new GameObject(boxPosition.position));
             this.staticBoxes.push(component);
         });
     }
@@ -56,6 +56,8 @@ export class PhysicProcessor {
 
     static checkColisionBetweenMovingBoxAndStaticBox(originalPosition: IVec2, movingBox: RigidBoxComponent, staticBox: RigidBoxComponent) {
         if (PhysicProcessor.colided(movingBox, staticBox)) {
+            movingBox.collidedWith(staticBox.tag);
+
             const diff = Vec2.subtrac(movingBox.position, originalPosition);
 
             // from top

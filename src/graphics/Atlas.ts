@@ -7,7 +7,7 @@ build vertical atlas with:
     magick montage -mode concatenate -tile 1x  mario_tiles_*.png -background none mario.png
 */
 
-import { Vec2 } from "../core/Math";
+import { IVec2, Vec2 } from "../core/Math";
 import { SpriteData, SpriteManager } from "./Sprite";
 
 const zUnity = 0.00001;
@@ -82,7 +82,7 @@ export class AtlasBuilder {
         const totalRigidBoxes = this.data.layers.filter(x => x.collider == true).reduce<number>((prev, elem) => prev + elem.tiles.length, 0);
         const transformBuffer = new Float32Array(totalTiles * AtlasBuilder.ITEMS_PER_TRANSFORM_BUFFER);
 
-        const rigidBoxes = Array<Vec2>(totalRigidBoxes);
+        const rigidBoxes = Array<AtlasRigidBox>(totalRigidBoxes);
 
         // avoid memory allocation on each iteration
         let layer = new Layer();
@@ -106,7 +106,7 @@ export class AtlasBuilder {
                     Number.parseFloat(tile.id),                                 // depth
                 ], (offset++) * AtlasBuilder.ITEMS_PER_TRANSFORM_BUFFER);
 
-                layer.collider && rigidBoxes.push(new Vec2(x, y));
+                layer.collider && rigidBoxes.push(new AtlasRigidBox(layer.name, new Vec2(x, y)));
             }
         }
 
@@ -128,10 +128,10 @@ export class Atlas {
     image: HTMLImageElement;
     modelBufferVertexLength: number;
     transformBufferVertexLength: number;
-    rigidBoxes: Array<Vec2>;
+    rigidBoxes: Array<AtlasRigidBox>;
     tileSize: number;
 
-    constructor(modelBuffer: Float32Array, transformBuffer: Float32Array, image: HTMLImageElement, sprites: SpriteManager,  rigidBoxes: Array<Vec2>, tileSize: number) {
+    constructor(modelBuffer: Float32Array, transformBuffer: Float32Array, image: HTMLImageElement, sprites: SpriteManager,  rigidBoxes: Array<AtlasRigidBox>, tileSize: number) {
         this.modelBuffer = modelBuffer;
         this.transformBuffer = transformBuffer;
         this.image = image;
@@ -145,5 +145,15 @@ export class Atlas {
 
     public getSprite(name: string): SpriteData | undefined {
         return this.sprites.get(name);
+    }
+}
+
+export class AtlasRigidBox {
+    position: IVec2;
+    tag: string;
+
+    constructor(tag: string, position: IVec2) {
+        this.position = position;
+        this.tag = tag;
     }
 }

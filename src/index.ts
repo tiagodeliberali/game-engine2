@@ -31,10 +31,17 @@ const run = async () => {
   const characterSpeed = 80;
   const character = new GameObject(new Vec2(4 * 16, 9 * 16));
   const characterSprite = new SpriteComponent(atlas.getSprite("character_idle_right")!);
-  const characterBox = new RigidBoxComponent(RigidBox.MovingBox(new Vec2(8, 15), new Vec2(4,0)));
+  const characterBox = new RigidBoxComponent(RigidBox.MovingBox("player", new Vec2(8, 15), new Vec2(4,0)));
 
   let lastMove: string;
   let jump = false;
+
+  characterBox.onCollision = (tag: string) => {
+    if (tag == "Ground" || tag == "Blocks" || tag == "Bridge") {
+      jump = false;
+    }
+  };
+
   const characterCode = new CodeComponent(() => {
     if (isKeyPressed(Keys.ArrowLeft)) {
       characterBox.velocity.x = -characterSpeed;

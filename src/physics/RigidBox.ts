@@ -1,4 +1,5 @@
 import { Component } from "../core/Component";
+import { OnEvent } from "../core/EventHandler";
 import { GameObject } from "../core/GameObject";
 import { IVec2, ReadOnlyVec2, Vec2 } from "../core/Math";
 import { GraphicEntityManager } from "../graphics/EntityManager";
@@ -8,19 +9,21 @@ export class RigidBox {
     readonly isStatic: boolean;
     readonly offset: ReadOnlyVec2;
     readonly size: ReadOnlyVec2;
+    readonly tag: string;
 
-    private constructor(size: IVec2, offset: IVec2, isStatic: boolean) {
+    private constructor(tag: string, size: IVec2, offset: IVec2, isStatic: boolean) {
         this.isStatic = isStatic;
+        this.tag = tag;
         this.size = new ReadOnlyVec2(Vec2.clone(size));
         this.offset = new ReadOnlyVec2(Vec2.clone(offset));
     }
 
-    static StaticBox(size: IVec2, offset: IVec2) {
-        return new RigidBox(size, offset, true);
+    static StaticBox(tag: string, size: IVec2, offset: IVec2) {
+        return new RigidBox(tag, size, offset, true);
     }
 
-    static MovingBox(size: IVec2, offset: IVec2) {
-        return new RigidBox(size, offset, false);
+    static MovingBox(tag: string, size: IVec2, offset: IVec2) {
+        return new RigidBox(tag, size, offset, false);
     }
 }
 
@@ -34,6 +37,7 @@ export class RigidBoxComponent extends Component {
     private entityManager: GraphicEntityManager<DebugData> | undefined;
     velocity: Vec2;
     aceleration: Vec2;
+    onCollision: (tag: string) => void | undefined;
 
     get isStatic() {
         return this.box.isStatic;
@@ -79,6 +83,10 @@ export class RigidBoxComponent extends Component {
         return this.box.size.y;
     }
 
+    get tag(): string {
+        return this.box.tag;
+    }
+
     constructor(box: RigidBox) {
         super();
         this.box = box;
@@ -97,6 +105,10 @@ export class RigidBoxComponent extends Component {
         this._gameObject = gameObject;
         this._gameObject.subscribeOnChangePosition(() => this.updateGameObjectPosition());
         this.updateGameObjectPosition();
+    }
+
+    collidedWith(tag: string){ 
+        this.onCollision && this.onCollision(tag);
     }
 
     private setPosition(vec: IVec2) {
