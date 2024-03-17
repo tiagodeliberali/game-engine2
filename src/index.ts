@@ -56,6 +56,17 @@ const run = async () => {
   };
 
   const characterCode = new CodeComponent();
+
+  characterCode.initAction = () => {
+    subscribeOnKeyDown(Keys.Space, () => {
+      if (jump > 0) {
+        characterBox.velocity.y = 200;
+        jump--;
+        logger.set("jump key down", `${jump}`);
+      }
+    });
+  }
+
   characterCode.updateAction = () => {
     if (isKeyPressed(Keys.ArrowLeft)) {
       characterBox.velocity.x = -characterSpeed;
@@ -83,16 +94,6 @@ const run = async () => {
 
     logger.set("character position", `${characterBox.position.x},${characterBox.position.y}`);
   };
-
-  characterCode.initAction = () => {
-    subscribeOnKeyDown(Keys.Space, () => {
-      if (jump > 0) {
-        characterBox.velocity.y = 200;
-        jump--;
-        logger.set("jump key down", `${jump}`);
-      }
-    });
-  }
 
   character.add(characterSprite);
   character.add(characterBox)
