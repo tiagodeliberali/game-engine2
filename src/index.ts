@@ -65,7 +65,7 @@ const run = async () => {
     Idle
   }
 
-  const queue = new Queue<Action>();
+  const sourceOfInputs = new Queue<Action>();
 
   const keyboadrInput = new GameObject(new Vec2(0, 0));
   const keyboardCode = new CodeComponent();
@@ -73,30 +73,35 @@ const run = async () => {
 
   keyboardCode.updateAction = () => {
     if (isKeyPressed(Keys.ArrowLeft)) {
-      queue.enqueue(Action.WalkLeft);
+      sourceOfInputs.enqueue(Action.WalkLeft);
     }
     else if (isKeyPressed(Keys.ArrowRight)) {
-      queue.enqueue(Action.WalkRight);
-    }
-    else {
-      queue.enqueue(Action.Idle);
+      sourceOfInputs.enqueue(Action.WalkRight);
     }
   };
 
   keyboardCode.initAction = () => {
     subscribeOnKeyDown(Keys.Space, () => {
-      queue.enqueue(Action.Jump);
+      sourceOfInputs.enqueue(Action.Jump);
     });
-};
+  };
 
   characterCode.updateAction = () => {
-    const action = queue.dequeue();
+    const input = sourceOfInputs.dequeue();
 
-    if (action == undefined) {
-      return;
+    // no actions from input
+    if (input == undefined) {
+      characterBox.velocity.x = 0;
+      if (lastMove == Keys.ArrowLeft) {
+        characterSprite.updateSprite(atlas.getSprite("character_idle_left")!);
+        lastMove = "";
+      } else if (lastMove == Keys.ArrowRight) {
+        characterSprite.updateSprite(atlas.getSprite("character_idle_right")!);
+        lastMove = "";
+      }
     }
 
-    switch (action) {
+    switch (input) {
       case Action.WalkRight:
         characterBox.velocity.x = characterSpeed;
         characterSprite.updateSprite(atlas.getSprite("character_walk_right")!);
@@ -112,16 +117,6 @@ const run = async () => {
           characterBox.velocity.y = 200;
           jump--;
           logger.set("jump key down", `${jump}`);
-        }
-        break;
-      default:
-        characterBox.velocity.x = 0;
-        if (lastMove == Keys.ArrowLeft) {
-          characterSprite.updateSprite(atlas.getSprite("character_idle_left")!);
-          lastMove = "";
-        } else if (lastMove == Keys.ArrowRight) {
-          characterSprite.updateSprite(atlas.getSprite("character_idle_right")!);
-          lastMove = "";
         }
         break;
     }
