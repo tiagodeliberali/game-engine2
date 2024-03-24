@@ -1,5 +1,6 @@
 import { GameObject } from "../core/GameObject";
 import { IVec2, Vec2 } from "../core/Math";
+import { HtmlLogger } from "../debug/HtmlLogger";
 import { Atlas } from "../graphics/Atlas";
 import { RigidBox, RigidBoxComponent } from "./RigidBox";
 
@@ -7,6 +8,11 @@ export class PhysicProcessor {
     movingBoxes: Array<RigidBoxComponent> = new Array<RigidBoxComponent>();
     staticBoxes: Array<RigidBoxComponent> = new Array<RigidBoxComponent>();
     lastTime: number = 0;
+    logger: HtmlLogger;
+
+    constructor(logger: HtmlLogger) {
+        this.logger = logger;
+    }
 
     configureRigidBoxComponent(rigidBox: RigidBoxComponent) {
         rigidBox.isStatic
@@ -20,7 +26,7 @@ export class PhysicProcessor {
     loadAtlas(atlas: Atlas) {
         atlas.rigidBoxes.forEach((boxPosition) => {
             const component = new RigidBoxComponent(RigidBox.StaticBox(boxPosition.tag, new Vec2(atlas.tileSize, atlas.tileSize), Vec2.zero()));
-            component.setReferece(new GameObject(boxPosition.position));
+            component.setReferece(new GameObject(boxPosition.position, `atlas:${boxPosition.tag}:${boxPosition.position.x}:${boxPosition.position.y}`));
             this.staticBoxes.push(component);
         });
     }
