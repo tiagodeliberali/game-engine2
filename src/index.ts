@@ -55,6 +55,8 @@ const buildCharacter = (atlas: Atlas, logger: HtmlLogger, queue: Queue<UserActio
 
   const characterCode = new CodeComponent();
   characterCode.updateAction = (delta) => {
+    // the concept is based on one action per update. So, whenever we have more than one action per update, like in jump, we need to consume multiple actions at once.
+    // also, even the local player produces and consumes from queues
     const userData = queue.dequeue();
     
     if (userData != undefined) {  
@@ -62,6 +64,9 @@ const buildCharacter = (atlas: Atlas, logger: HtmlLogger, queue: Queue<UserActio
     }
 
     const input = userData?.action;
+
+    // if it is undefined, it means that no event was generated, so we can left physics engine to act.
+    // since we have no position data, we can have mismatches between players, but it will be fixed in the next action received.
     if (input == undefined) {
       characterBox.velocity.x = 0;
       if (lastMove == Keys.ArrowLeft) {
@@ -98,6 +103,7 @@ const buildCharacter = (atlas: Atlas, logger: HtmlLogger, queue: Queue<UserActio
         break;
     }
 
+    // TODO: we need to have a more elegant way to define borders of the world
     if (characterBox.leftX < 0) {
       characterBox.x = 0;
     }

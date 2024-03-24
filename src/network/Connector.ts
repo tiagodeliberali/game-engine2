@@ -5,7 +5,6 @@ import { GameObject } from "../core/GameObject";
 import { OnlineUserStorage } from "./Storage";
 import { Action, UserActionData, UserManagementAction, UserManagementData } from "./Core";
 import { IVec2 } from "../core/Math";
-// import 'dotenv/config';
 
 export enum Channel {
     Users = "users",
