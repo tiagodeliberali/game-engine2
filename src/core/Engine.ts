@@ -31,7 +31,7 @@ export class Engine {
     static async build(logger: HtmlLogger, enableDebugger: boolean, camera: Array<number>) {
         const graphicProcessor = await GraphicProcessor.build();
         const debugGraphicProcessor = await GraphicDebugger.build();
-        const engine = new Engine(graphicProcessor, new PhysicProcessor(), new CodeProcessor(), logger, camera);
+        const engine = new Engine(graphicProcessor, new PhysicProcessor(logger), new CodeProcessor(), logger, camera);
 
         if (enableDebugger) {
             engine.enableGraphicDebugger(debugGraphicProcessor);
@@ -88,15 +88,18 @@ export class Engine {
 
     fixedUpdate(delta: number) {
         while (delta > fixedUpdateDelta) {
-            this.physicProcessor.fixedUpdate(fixedUpdateDelta);
-            this.codeProcessor?.update(fixedUpdateDelta);
+            this.fixedUpdateSequence(fixedUpdateDelta);
             delta -= fixedUpdateDelta;
         }
 
         if (delta > 0.0001) {
-            this.physicProcessor.fixedUpdate(delta);
-            this.codeProcessor?.update(delta);
+            this.fixedUpdateSequence(delta);
         }
+    }
+
+    private fixedUpdateSequence(delta: number) {
+        this.codeProcessor?.fixedUpdate(delta);
+        this.physicProcessor.fixedUpdate(delta);
     }
 
     start() {
@@ -109,11 +112,13 @@ export class Engine {
             const delta = (newTime - time) / 1000;
             time = newTime;
 
-            this.update(delta);
+            // this.logger.startSessions();
             this.fixedUpdate(delta)
+            this.update(delta);
+            // this.logger.endSessions();
 
             // debug
-            this.logger.set("delta", `${Math.round(delta)}`);
+            this.logger.set("Engine: delta", `${Math.round(delta)}`);
             
 
             requestAnimationFrame(update);
