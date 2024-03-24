@@ -10,14 +10,16 @@ export class GameObject {
     private readonly components: Array<Component>
     private readonly _position: Vec2;
     private readonly _readOnlyPosition: ReadOnlyVec2;
-    readonly id: string
+    readonly id: string;
+    debugName: string;
 
-    constructor(position: IVec2) {
+    constructor(position: IVec2, debugName: string) {
         this._position = Vec2.clone(position);
         this._readOnlyPosition = new ReadOnlyVec2(this._position);
 
         this.components = [];
         this.id = (id++).toString();
+        this.debugName = debugName;
     }
 
     get componentsIterable(): Iterable<Component> {

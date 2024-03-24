@@ -40,7 +40,7 @@ test('Moving rigid box should NOT be marked as static', () => {
  */
 test('RigidBox component get correct position values', () => {
     // arrange
-    const gameObject = new GameObject(new Vec2(40, 20));
+    const gameObject = new GameObject(new Vec2(40, 20), "gameObject");
     const box = RigidBox.MovingBox("test", new Vec2(7, 6), new Vec2(3, 2));
 
     // act
@@ -65,7 +65,7 @@ test('RigidBox component get correct position values', () => {
 
 test('Move game object should move component', () => {
     // arrange
-    const gameObject = new GameObject(new Vec2(40, 20));
+    const gameObject = new GameObject(new Vec2(40, 20), "gameObject");
     const box = RigidBox.MovingBox("test", new Vec2(7, 6), new Vec2(3, 2));
 
     const component = new RigidBoxComponent(box);
@@ -90,7 +90,7 @@ test('Move game object should move component', () => {
 
 test('Update position should update all values', () => {
     // arrange
-    const gameObject = new GameObject(new Vec2(40, 20));
+    const gameObject = new GameObject(new Vec2(40, 20), "gameObject");
     const box = RigidBox.MovingBox("test", new Vec2(7, 6), new Vec2(3, 2));
 
     const component = new RigidBoxComponent(box);
@@ -115,7 +115,7 @@ test('Update position should update all values', () => {
 
 test('Update x and y should update all values', () => {
     // arrange
-    const gameObject = new GameObject(new Vec2(40, 20));
+    const gameObject = new GameObject(new Vec2(40, 20), "gameObject");
     const box = RigidBox.MovingBox("test", new Vec2(7, 6), new Vec2(3, 2));
 
     const component = new RigidBoxComponent(box);

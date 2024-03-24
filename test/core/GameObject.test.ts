@@ -3,15 +3,15 @@ import { GameObject } from "../../src/core/GameObject";
 import { Vec2 } from "../../src/core/Math";
 
 test('GameObjects instances have a outo increment id', () => {
-    const g1 = new GameObject(Vec2.zero());
-    const g2 = new GameObject(Vec2.zero());
+    const g1 = new GameObject(Vec2.zero(), "g1");
+    const g2 = new GameObject(Vec2.zero(), "g2");
 
     expect(g1.id).toBe("1");
     expect(g2.id).toBe("2");
 });
 
 test('GameObject fires event on set position', () => {
-    const gameObject = new GameObject(Vec2.zero());
+    const gameObject = new GameObject(Vec2.zero(), "gameObject");
 
     let isTriggered = false;
     gameObject.subscribeOnChangePosition(() => isTriggered = true);
@@ -24,7 +24,7 @@ test('GameObject fires event on set position', () => {
 });
 
 test('GameObject fires event on update position', () => {
-    const gameObject = new GameObject(new Vec2(2, 3));
+    const gameObject = new GameObject(new Vec2(2, 3), "gameObject");
 
     let isTriggered = false;
     gameObject.subscribeOnChangePosition(() => isTriggered = true);
@@ -37,7 +37,7 @@ test('GameObject fires event on update position', () => {
 });
 
 test('Add component sets reference to gameObject', () => {
-    const gameObject = new GameObject(Vec2.zero());
+    const gameObject = new GameObject(Vec2.zero(), "gameObject");
     const component = new TestComponent();
 
     gameObject.add(component);
@@ -54,7 +54,7 @@ test('Add component sets reference to gameObject', () => {
 
 test('GameObject Vec2 reference is a new instance and doesnt share pointer', () => {
     const vec = new Vec2(2, 3);
-    const gameObject = new GameObject(vec);
+    const gameObject = new GameObject(vec, "gameObject");
 
     vec.x = 10;
     vec.y = 20;
