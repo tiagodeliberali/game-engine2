@@ -8,12 +8,15 @@ export class CodeProcessor {
     configureCodeComponent(codeComponent: CodeComponent) {
         if (codeComponent.updateAction) {
             this.updateComponents.push(codeComponent);
+            this.updateComponents.sort((a, b) => a.priority - b.priority);
         }
         if (codeComponent.fixedUpdateAction) {
             this.fixedUpdateComponents.push(codeComponent);
+            this.fixedUpdateComponents.sort((a, b) => a.priority - b.priority);
         }
         if (codeComponent.initAction) {
             this.initComponents.push(codeComponent);
+            this.initComponents.sort((a, b) => a.priority - b.priority);
         }
     }
 

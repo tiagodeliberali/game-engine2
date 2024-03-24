@@ -4,7 +4,7 @@ import { CodeProcessor } from "../../src/code/CodeProcessor";
 test('init calls initAction of all initComponents', () => {
     // Arrange
     const processor = new CodeProcessor();
-    const component = new CodeComponent();
+    const component = new CodeComponent(10);
     component.initAction = () => { wasCalled = true; };
     let wasCalled = false;
     
@@ -19,7 +19,7 @@ test('init calls initAction of all initComponents', () => {
 test('update calls updateAction of all updateComponents', () => {
     // Arrange
     const processor = new CodeProcessor();
-    const component = new CodeComponent();
+    const component = new CodeComponent(10);
     component.updateAction = () => { wasCalled = true; };
     let wasCalled = false;
     
@@ -34,7 +34,7 @@ test('update calls updateAction of all updateComponents', () => {
 test('fixedUpdate calls fixedUpdateAction of all fixedUpdateComponents', () => {
     // Arrange
     const processor = new CodeProcessor();
-    const component = new CodeComponent();
+    const component = new CodeComponent(10);
     component.fixedUpdateAction = () => { wasCalled = true; };
     let wasCalled = false;
     

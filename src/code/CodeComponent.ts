@@ -5,13 +5,15 @@ import { GameObject } from "../core/GameObject";
 export class CodeComponent extends Component {
     static readonly Name = 'CodeComponent';
     private gameObject: GameObject | null = null;
+    readonly priority: number;
     
     updateAction: ((delta: number) => void) | null = null;
     fixedUpdateAction: ((delta: number) => void) | null = null;
     initAction: (() => void) | null = null;
 
-    constructor() {
+    constructor(priority: number) {
         super();
+        this.priority = priority;
     }
 
     setReferece(gameObject: GameObject): void {
