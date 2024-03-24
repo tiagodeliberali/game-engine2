@@ -53,7 +53,7 @@ const buildCharacter = (atlas: Atlas, logger: HtmlLogger, queue: Queue<UserActio
     }
   };
 
-  const characterCode = new CodeComponent(1000);
+  const characterCode = new CodeComponent();
   characterCode.updateAction = (delta) => {
     const userData = queue.dequeue();
     

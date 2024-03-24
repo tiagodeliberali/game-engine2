@@ -11,7 +11,7 @@ export class CodeComponent extends Component {
     fixedUpdateAction: ((delta: number) => void) | null = null;
     initAction: (() => void) | null = null;
 
-    constructor(priority: number) {
+    constructor(priority: number = 1000) {
         super();
         this.priority = priority;
     }
