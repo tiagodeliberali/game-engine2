@@ -5,6 +5,7 @@
     "lint": "npx eslint . --ext .ts,.tsx",
     "all": "npm run lint",
     "server": "npx webpack serve",
+    "ioserver": "node src/network/server.js",
     "test": "jest --coverage"
   },
   "devDependencies": {
