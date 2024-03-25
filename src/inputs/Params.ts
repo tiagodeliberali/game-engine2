@@ -1,3 +1,11 @@
-const params = (new URL(document.location)).searchParams;
+export class Params {
+    private params: URLSearchParams;
 
-export const getQueryParam = (name: string) => params.get(name);
+    constructor(location: Location) {
+        this.params = (new URL(location.href)).searchParams;
+    }
+
+    getQueryParam(name: string) {
+        return this.params.get(name);
+    }
+}

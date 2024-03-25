@@ -10,7 +10,7 @@ import { CodeComponent } from "./code/CodeComponent";
 import { Queue } from "./core/Queue";
 import { ServerConector } from "./network/Connector";
 import { Action, UserActionData } from "./network/Core";
-import { getQueryParam } from "./inputs/Params";
+import { Params } from "./inputs/Params";
 
 const basicBlocks = (atlas: Atlas, scene: Engine) => {
   const coin1 = new GameObject(new Vec2(7 * 16, 4 * 16), "coin1");
@@ -131,7 +131,8 @@ const run = async () => {
   basicBlocks(atlas, scene);
 
   // get unique id
-  const username = getQueryParam("id");
+  const params = new Params(window.location);
+  const username = params.getQueryParam("id");
 
   // Socket.IO
   const connector = new ServerConector(logger, (queue: Queue<UserActionData>, debugname: string) => buildCharacter(atlas, logger, queue, scene, debugname).character);
