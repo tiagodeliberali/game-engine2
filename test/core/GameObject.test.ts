@@ -2,12 +2,14 @@ import { Component } from "../../src/core/Component";
 import { GameObject } from "../../src/core/GameObject";
 import { Vec2 } from "../../src/core/Math";
 
-test('GameObjects instances have a outo increment id', () => {
+test('GameObjects instances have a outo increment id and debug name', () => {
     const g1 = new GameObject(Vec2.zero(), "g1");
     const g2 = new GameObject(Vec2.zero(), "g2");
 
     expect(g1.id).toBe("1");
     expect(g2.id).toBe("2");
+    expect(g1.debugName).toBe("g1");
+    expect(g2.debugName).toBe("g2");
 });
 
 test('GameObject fires event on set position', () => {
