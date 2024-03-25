@@ -13,5 +13,3 @@ Also, the pipeline is not good yet... there is much work to be done.
 This time I am basing my studies on:
 
 WebGL 2.0 code based on great tutorial from Andrew Adamson on youtube: https://www.youtube.com/watch?v=-T6EbWCq99c&list=PLPbmjY2NVO_X1U1JzLxLDdRn4NmtxyQQo
-
-Physics 2d: https://www.youtube.com/watch?v=vcgtwY39FT0&list=PLtrSb4XxIVbpZpV65kk73OoUcIrBzoSiO (just started, no code yet)
