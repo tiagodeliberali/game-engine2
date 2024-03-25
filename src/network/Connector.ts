@@ -6,7 +6,7 @@ import { OnlineUserStorage } from "./Storage";
 import { Action, UserActionData, UserManagementAction, UserManagementData } from "./Core";
 import { IVec2 } from "../core/Math";
 
-export enum Channel {
+enum Channel {
     Users = "users",
     Action = "action",
     Error = "connect_error"
