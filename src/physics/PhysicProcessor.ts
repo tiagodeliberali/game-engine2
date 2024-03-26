@@ -1,6 +1,6 @@
 import { GameObject } from "../core/GameObject";
 import { IVec2, Vec2 } from "../core/Math";
-import { HtmlLogger } from "../debug/HtmlLogger";
+import { ILogger } from "../debug/HtmlLogger";
 import { Atlas } from "../graphics/Atlas";
 import { RigidBox, RigidBoxComponent } from "./RigidBox";
 
@@ -8,9 +8,9 @@ export class PhysicProcessor {
     movingBoxes: Array<RigidBoxComponent> = new Array<RigidBoxComponent>();
     staticBoxes: Array<RigidBoxComponent> = new Array<RigidBoxComponent>();
     lastTime: number = 0;
-    logger: HtmlLogger;
+    logger: ILogger;
 
-    constructor(logger: HtmlLogger) {
+    constructor(logger: ILogger) {
         this.logger = logger;
     }
 

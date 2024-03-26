@@ -1,4 +1,10 @@
-export class HtmlLogger {
+export interface ILogger {
+    set(key: string, value: string): void;
+    startSessions(): void;
+    endSessions(): void;
+}
+
+export class HtmlLogger implements ILogger {
     private logElement: HTMLSpanElement;
     private keyValuePairs: Map<string, string>;
     private sessionData: string | undefined = undefined;

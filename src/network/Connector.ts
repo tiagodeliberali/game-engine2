@@ -1,5 +1,5 @@
 import { Socket, io } from "socket.io-client";
-import { HtmlLogger } from "../debug/HtmlLogger";
+import { ILogger } from "../debug/HtmlLogger";
 import { Queue } from "../core/Queue";
 import { GameObject } from "../core/GameObject";
 import { OnlineUserStorage } from "./Storage";
@@ -18,10 +18,14 @@ export class ServerConector {
     private socket: Socket;
     private buildCharacterFunc: BuildCharacterFunc;
     private storage: OnlineUserStorage;
-    private localusername: string | undefined;
+    private _localUsername: string | undefined;
     private localUserQueue: Queue<UserActionData>;
 
-    constructor(logger: HtmlLogger, buildCharacterFunc: BuildCharacterFunc) {
+    get localUsername() {
+        return this._localUsername;
+    }
+
+    constructor(logger: ILogger, buildCharacterFunc: BuildCharacterFunc) {
         this.buildCharacterFunc = buildCharacterFunc;
         this.storage = new OnlineUserStorage();
         this.localUserQueue = new Queue<UserActionData>();
@@ -36,7 +40,7 @@ export class ServerConector {
         });
 
         this.socket.on(Channel.Users, (userManagementData: UserManagementData) => {
-            if (this.localusername == undefined) {
+            if (this._localUsername == undefined) {
                 throw Error("SHould not receive events if user is not set");
             }
 
@@ -66,7 +70,7 @@ export class ServerConector {
     }
 
     private createUserIfNew(username: string) {
-        if (this.localusername != username && !this.storage.has(username)) {
+        if (this._localUsername != username && !this.storage.has(username)) {
             const queue = new Queue<UserActionData>();
             const gameObject = this.buildCharacterFunc(queue, "onlineCharacter:" + username);
             this.storage.add(username, gameObject, queue);
@@ -80,13 +84,13 @@ export class ServerConector {
     }
 
     connect(username: string) {
-        this.localusername = username;
+        this._localUsername = username;
         this.socket.auth = { username };
         this.socket.connect();
     }
 
     emitLocalAction(action: Action, position: IVec2) {
-        const userData = new UserActionData(this.localusername ?? "_localUser", action, position)
+        const userData = new UserActionData(this._localUsername ?? "_localUser", action, position)
         this.localUserQueue.enqueue(userData);
         this.socket.emit(Channel.Action, userData);
     }

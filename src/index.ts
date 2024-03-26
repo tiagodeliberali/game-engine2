@@ -5,7 +5,7 @@ import { GameObject } from "./core/GameObject";
 import { SpriteComponent } from "./graphics/Sprite";
 import { Vec2 } from "./core/Math";
 import { RigidBox, RigidBoxComponent, removeWhenTouch } from "./physics/RigidBox";
-import { HtmlLogger } from "./debug/HtmlLogger";
+import { HtmlLogger, ILogger } from "./debug/HtmlLogger";
 import { CodeComponent } from "./code/CodeComponent";
 import { Queue } from "./core/Queue";
 import { ServerConector } from "./network/Connector";
@@ -31,7 +31,7 @@ const basicBlocks = (atlas: Atlas, scene: Engine) => {
   scene.add([coin1, coin2, key]);
 }
 
-const buildCharacter = (atlas: Atlas, logger: HtmlLogger, queue: Queue<UserActionData>, scene: Engine, debugName: string) => {
+const buildCharacter = (atlas: Atlas, logger: ILogger, queue: Queue<UserActionData>, scene: Engine, debugName: string) => {
   const characterSpeed = 80;
   const character = new GameObject(new Vec2(4 * 16, 9 * 16), debugName);
   const characterSprite = new SpriteComponent(atlas.getSprite("character_idle_right")!);

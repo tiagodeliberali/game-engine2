@@ -8,7 +8,7 @@ import { RigidBoxComponent } from "../physics/RigidBox";
 import { GameObject } from "./GameObject";
 import { CodeProcessor } from "../code/CodeProcessor";
 import { CodeComponent } from "../code/CodeComponent";
-import { HtmlLogger } from "../debug/HtmlLogger";
+import { ILogger } from "../debug/HtmlLogger";
 
 const fixedUpdateDelta = 1.0 / 60;
 
@@ -17,10 +17,10 @@ export class Engine {
     private physicProcessor: PhysicProcessor;
     private debugGraphicProcessor: GraphicDebugger | undefined;
     private codeProcessor: CodeProcessor | undefined;
-    private logger: HtmlLogger;
+    private logger: ILogger;
     private camera: Array<number>;
 
-    private constructor(graphicProcessor: GraphicProcessor, physicProcessor: PhysicProcessor, codeProcessor: CodeProcessor, logger: HtmlLogger, camera: Array<number>) {
+    private constructor(graphicProcessor: GraphicProcessor, physicProcessor: PhysicProcessor, codeProcessor: CodeProcessor, logger: ILogger, camera: Array<number>) {
         this.graphicProcessor = graphicProcessor;
         this.physicProcessor = physicProcessor;
         this.codeProcessor = codeProcessor;
@@ -28,7 +28,7 @@ export class Engine {
         this.camera = camera;
     }
 
-    static async build(logger: HtmlLogger, enableDebugger: boolean, camera: Array<number>) {
+    static async build(logger: ILogger, enableDebugger: boolean, camera: Array<number>) {
         const graphicProcessor = await GraphicProcessor.build();
         const debugGraphicProcessor = await GraphicDebugger.build();
         const engine = new Engine(graphicProcessor, new PhysicProcessor(logger), new CodeProcessor(), logger, camera);
